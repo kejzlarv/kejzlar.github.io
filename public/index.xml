@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Vojtech Kejzlar</title>
+    <link>http://www.kejzlar.com/</link>
+    <description>Recent content on Vojtech Kejzlar</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language><atom:link href="http://www.kejzlar.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About</title>
+      <link>http://www.kejzlar.com/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/about/</guid>
+      <description>My name is Vojtech (Vojta) Kejzlar. I am a data scientist, an academic, and a science educator. My work focuses on Bayesian data analysis, predictive modeling, and uncertainty quantification in the context of machine learning. I build statistical and machine learning tools to solve problems in physical sciences and create innovative resources for data science literacy. I am currently an Assistant Professor of Statistics in the Department of Mathematics and Statistics at Skidmore College in Saratoga Springs, New York.</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>http://www.kejzlar.com/projects/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/projects/</guid>
+      <description>Here are projects that I have been working on during the past couple of years. They are a mix of Bayesian data analysis, machine learning modeling, and data science education. Take a look at the list of my publications and my GitHub to see the fruits of this labor.
+Bayesian Mining of Nuclear Mass DataLink to headingThe mass, or binding energy, is the basic property of the atomic nucleus.</description>
+    </item>
+    
+    <item>
+      <title>Publications</title>
+      <link>http://www.kejzlar.com/publications/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/publications/</guid>
+      <description>Vojtech Kejzlar, Tapabrata Maiti (2023). Variational Inference With Vine Copulas: an Efficient Approach for Bayesian Computer Model Calibration. Statistics and Computing. arXiv
+Vojtech Kejzlar, Jingchen Hu (2023). Introducing Variational Inference in Statistics and Data Science Curriculum. The American Statistician. arXiv
+Vojtech Kejzlar, Shrijita Bhattacharya, Mookyong Son, Tapabrata Maiti (2022). Black Box Variational Bayesian Model Averaging. The American Statistician. arXiv
+Vojtech Kejzlar, Mookyong Son, Shrijita Bhattacharya, Tapabrata Maiti (2021). A Fast and Calibrated Computer Model Emulator: an Empirical Bayes Approach.</description>
+    </item>
+    
+  </channel>
+</rss>

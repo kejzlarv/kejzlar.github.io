@@ -1,0 +1,87 @@
+baseurl = "http://www.kejzlar.com"
+title = "Vojtech Kejzlar"
+theme = "hugo-coder"
+languagecode = "en"
+defaultcontentlanguage = "en"
+
+paginate = 20
+
+disqusShortname = "yourdiscussshortname"
+
+[markup.highlight]
+style = "github-dark"
+
+[params]
+  author = "Vojtech Kejzlar"
+  info = "Data Scientist, Academic, and Science Educator"
+  description = "Vojtech Kejzlar's personal website"
+  keywords = "blog,developer,personal"
+  avatarurl = "images/avatar.jpg"
+  #gravatar = "john.doe@example.com"
+
+  faviconSVG = "/images/favicon.svg"
+  favicon_32 = "/images/favicon-32x32.png"
+  favicon_16 = "/images/favicon-16x16.png"
+
+  since = 2020
+
+  enableTwemoji = true
+
+  colorScheme = "dark"
+  hidecolorschemetoggle = false
+
+  # customCSS = ["css/custom.css"]
+  # customSCSS = ["scss/custom.scss"]
+  # customJS = ["js/custom.js"]
+
+[taxonomies]
+  category = "categories"
+  series = "series"
+  tag = "tags"
+  author = "authors"
+
+# Social links
+[[params.social]]
+  name = "Github"
+  icon = "fa fa-github fa-2x"
+  weight = 1
+  url = "https://github.com/kejzlarv"
+
+[[params.social]]
+  name = "LinkedIn"
+  icon = "fa fa-2x fa-linkedin"
+  weight = 3
+  url = "https://www.linkedin.com/in/vojtech-kejzlar-a9bb309b"
+
+[[params.social]]
+  name = "Email"
+  icon = "fa fa-envelope fa-2x"
+  weight = 2
+  url = "mailto:kejzlarvojtech@gmail.com"
+
+[[params.social]]
+  name = "Scholar"
+  icon = "fa fa-graduation-cap  fa-2x"
+  weight = 4
+  url = "https://scholar.google.com/citations?user=Wq9D-3gAAAAJ&hl=cs"
+
+# Menu links
+#[[menu.main]]
+#  name = "Posts"
+#  weight = 4
+#  url  = "posts/"
+
+[[menu.main]]
+  name = "About"
+  weight = 1
+  url = "about/"
+
+[[menu.main]]
+  name = "Projects"
+  weight = 2
+  url = "projects/"
+
+[[menu.main]]
+  name = "Publications"
+  weight = 3
+  url = "publications/"

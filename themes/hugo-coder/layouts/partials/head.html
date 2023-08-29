@@ -19,3 +19,5 @@
 {{ if .IsHome }}{{ partial "head/hugo-generator.html" . }}{{ end }}
 
 {{ partial "head/extensions.html" . }}
+
+{{ if .Params.math }}{{ partial "helpers/katex.html" . }}{{ end }}

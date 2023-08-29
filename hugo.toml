@@ -6,7 +6,7 @@ defaultcontentlanguage = "en"
 
 paginate = 20
 
-disqusShortname = "yourdiscussshortname"
+#disqusShortname = "yourdiscussshortname"
 
 [params.googleTagManager]
 id = "G-K5J0TDJRQ3"
@@ -30,7 +30,7 @@ style = "github-dark"
 
   enableTwemoji = true
 
-  colorScheme = "dark"
+  colorScheme = "light"
   hidecolorschemetoggle = false
 
   # customCSS = ["css/custom.css"]
@@ -69,10 +69,10 @@ style = "github-dark"
   url = "https://scholar.google.com/citations?user=Wq9D-3gAAAAJ&hl=cs"
 
 # Menu links
-#[[menu.main]]
-#  name = "Posts"
-#  weight = 4
-#  url  = "posts/"
+[[menu.main]]
+  name = "Blog"
+  weight = 4
+  url  = "posts/"
 
 [[menu.main]]
   name = "About"

@@ -38,7 +38,7 @@ In many settings, a central task task in UQ of probabilistic models is the evalu
 $$ p(\bold{\theta} \mid \bold{y})  = \frac{p(\bold{y} \mid \bold{\theta})p(\bold{\theta})}{p(\bold{y})} \propto p(\bold{y} \mid \bold{\theta})p(\bold{\theta}).$$
 
 Here, $p(\bold{y} \mid \bold{\theta})$ is the sampling density given by the underlying
-probabilistic model for data, $p(\bold{\theta})$ is the prior density that represents our prior beliefs about $\bold{\theta}$ before seeing the data, and $p(\bold{y})$ is the marginal data distribution. The posterior distribution, however, has closed form only in a limited number of scenarios (e.g., conjugate priors) and therefore typically requires approximation. By far the most popular approximation methods are Markov chain Monte Carlo (MCMC) algorithms including Gibbs sampler, Metropolis, Metropolis-Hastings, and Hamiltonian Monte Carlo (See the [Bayesian bible](http://www.stat.columbia.edu/~gelman/book/BDA3.pdf) for a good review). While useful for simple models with moderately-sized dataset, these MCMC algorithms do not scale well with large datasets and can have a hard time approximating multimodal posteriors. These challenges limit the applications of probabilistic models with massive datasets needed to train neural networks, pattern recognition algorithms, or models for natural language processing. In the rest of this post, I want to give a gentle introduction to Variational inference, which is an alternative to the sampling-based approximation via MCMC that approximates a target density through optimization and tends to scale well to massive dataset.
+probabilistic model for data, $p(\bold{\theta})$ is the prior density that represents our prior beliefs about $\bold{\theta}$ before seeing the data, and $p(\bold{y})$ is the marginal data distribution. The posterior distribution, however, has closed form only in a limited number of scenarios (e.g., conjugate priors) and therefore typically requires approximation. By far the most popular approximation methods are Markov chain Monte Carlo (MCMC) algorithms including Gibbs sampler, Metropolis, Metropolis-Hastings, and Hamiltonian Monte Carlo (See the [Bayesian bible](http://www.stat.columbia.edu/~gelman/book/BDA3.pdf) for overview of these methods). While useful for simple models with moderately-sized dataset, these MCMC algorithms do not scale well with large datasets and can have a hard time approximating multimodal posteriors. These challenges limit the applications of probabilistic models with massive datasets needed to train neural networks, pattern recognition algorithms, or models for natural language processing. In the rest of this post, I want to give you a gentle introduction to Variational inference, which is an alternative to the sampling-based approximation via MCMC that approximates a target density through optimization and tends to scale well to massive dataset.
 
 
 # Idea behind variational inference {#ViIdea}
@@ -68,20 +68,20 @@ Let's now move on to the implementation details of variational inference startin
 One of the most popular families is the **mean-field** variational family which assumes that all the unknown parameters are mutually independent, each approximated by its own univariate variational density:
 $$ q(\bold{\theta} \mid \bold{\lambda}) = \prod_{i=1}^{m} q(\theta_i \mid \bold{\lambda}_i). $$
 
-For example, a typical choice for real-valued parameters is the normal variational family $q(\theta \mid \mu, \sigma^2)$ and the log-normal or Gamma for non-negative parameters. The main advantage of the mean-field family is in its simplicity as it requires only a minimum number of parameters to be estimated (no correlation parameters) and often leads to uncomplicated optimization. However, the mutually independent parameter assumption comes at a price because the mean-field family cannot capture relationships between model parameters. To see more comprehensive review of more complex variational families, take a look [here](https://proceedings.mlr.press/v130/ambrogioni21a.html). If would definitely recommend googling `normalizing flows` if you want to get serious about using VI.
+For example, a typical choice for real-valued parameters is the normal variational family $q(\theta \mid \mu, \sigma^2)$ and the log-normal or Gamma for non-negative parameters. The main advantage of the mean-field family is in its simplicity as it requires only a minimum number of parameters to be estimated (no correlation parameters) and often leads to uncomplicated optimization. However, the mutually independent parameter assumption comes at a price because the mean-field family cannot capture relationships between model parameters. To see more comprehensive review of more complex variational families, take a look [here](https://proceedings.mlr.press/v130/ambrogioni21a.html). If would definitely recommend googling **normalizing flows** if you want to get serious about using VI.
 
 # ELBO optimization {#Optimization}
 
-Besides the choice of variational family, another key implementation detail to address is the way in which we find the member of the variational family that maximizes the ELBO. Since this is a fairly general optimization problem, one can in principle use any optimization procedure. In the variational inference literature, the coordinate ascent and the gradient ascent procedures are the most prominent and widely used
+Besides the choice of variational family, another key implementation detail to address is the way in which one finds the member of the variational family that maximizes the ELBO. Since this is a fairly general optimization problem, one can in principle use any optimization procedure. In the VI literature, the coordinate ascent and the gradient ascent procedures are the most prominent and widely used.
 
 The coordinate ascent approach is based on the simple idea that one can maximize ELBO, which is a multivariate function, by cyclically maximizing it along one direction at a time. Starting with initial values (denoted by superscript $0$) of the $m$ variational parameters $\bold{\lambda}^0$
 
 $$ \bold{\lambda}^0 = (\bold{\lambda}^0_1, \dots,\bold{\lambda}^0_m), $$
-\end{equation*}
+
 one obtains the $(k+1)^{\text{th}}$ updated value of variational parameters by iteratively solving
 
 $$    \lambda_i^{k + 1} = \argmax_{x} \mathcal{L}(\lambda_1^{k + 1}, \dots, \lambda_{i-1}^{k + 1}, x, \lambda_{i + 1}^k, \dots, \lambda_m^k), $$
-which can be accomplished without using gradients [@blei17].
+which can be accomplished without using gradients.
 
 
 Variational inference via gradient ascent uses the standard iterative optimization algorithm based on the idea that the ELBO grows fastest in the direction of its gradient. In particular, the update of variational parameters $\bold{\lambda}$ at the $(k+1)^{\text{th}}$ iteration is given by
@@ -113,9 +113,9 @@ then
 
 $$\theta \mid \bold{y} \sim \textrm{Gamma}(\alpha+ \sum_{i=1}^n y_i, \beta + n). $$
 
-In other words, given $\alpha$, $\beta$, and $\bold{y}$, one can derive the analytical solution to the posterior of $p(\theta \mid \bold{y})$ and can subsequently sample from $\textrm{Gamma}(\alpha+ \sum_{i=1}^n y_i, \beta + n)$ to get posterior samples of $\theta$. So it turns out that actually no approximation is needed in this case, but it will serve as a good example of illustrating how variational inference works.
+In other words, given $\alpha$, $\beta$, and $\bold{y}$, one can derive the analytical solution to the posterior of $p(\theta \mid \bold{y})$ and can subsequently sample from $\textrm{Gamma}(\alpha+ \sum_{i=1}^n y_i, \beta + n)$ to get posterior samples of $\theta$. So it turns out that actually no approximation is needed in this case, but it will serve as a good example to illustrate how VI works.
 
-Recall that variational inference approximates the (unknown) posterior distribution of a parameter by a simple family of distributions. In this Gamma-Poisson case, we will approximate the posterior distribution $p(\theta \mid \bold{y})$ by a log-normal distribution with mean $\mu$ and standard deviation $\sigma$:
+Recall that VI approximates the (unknown) posterior distribution of a parameter by a simple family of distributions. In this Gamma-Poisson case, we will approximate the posterior distribution $p(\theta \mid \bold{y})$ by a log-normal distribution with mean $\mu$ and standard deviation $\sigma$:
 
 $$ q(\theta \mid \mu, \sigma) = \frac{1}{\theta \sigma \sqrt{2\pi}} e^{-\frac{(\ln{\theta} - \mu)^2}{2\sigma^2}}.$$
 
@@ -127,7 +127,7 @@ Enough of the general discussion about the Gamma-Poisson model and let us dig in
 
 # Document clustering with LDA {#Lda}
 
-Enough playing with simple examples, let us use variational inference to implement the Latent Dirichlet Allocation (LDA) model in `R` and apply to a dataset of documents. To do so, we will analyze a collection of 2246 Associated Press newspaper articles to be clustered using the LDA model. The dataset is part of the `topicmodels` package. You can load the dataset `AssociatedPress` with the following R command.
+Enough of playing with simple examples, let us use VIto implement the Latent Dirichlet Allocation (LDA) model in `R` and apply to a dataset of documents. To do so, we will analyze a collection of 2246 Associated Press newspaper articles to be clustered using the LDA model. The dataset is part of the `topicmodels` package. You can load the dataset `AssociatedPress` with the following R command.
 
 {{< highlight html >}}
 data("AssociatedPress", package = "topicmodels")
@@ -136,13 +136,13 @@ data("AssociatedPress", package = "topicmodels")
 The LDA is a mixed-membership clustering model, commonly used for document clustering. LDA models each document to have a mixture of topics, where each word in the document is drawn from a topic based on the mixing proportions. Specifically, the LDA model assumes $K$ topics for $M$ documents made up of words drawn from $V$ distinct words. For document $m$, a topic distribution $\bold{\theta_m}$ is drawn over $K$ topics from a Dirichlet distribution,
 $$\bold{\theta}_m \sim \textrm{Dirichlet}(\bold{\alpha}),$$
 
-where $\sum_{k=1}^{K}\theta_{m, k} = 1$ ($0 \leq \theta_{m, k} \leq 1$) and $\bold{\alpha}$ is the prior a vector of length $K$ with positive values.
+where $\sum_{k=1}^{K}\theta_{m, k} = 1$ ($0 \leq \theta_{m, k} \leq 1$) and $\bold{\alpha}$ is the prior vector of length $K$ with positive values.
 
 Each of the $N_m$ words $\{w_{m, 1},\dots, w_{m, N_m}\}$ in document $m$ is then generated independently conditional on $\bold{\theta_m}$. To do so, first, the topic $z_{m, n}$ for word $w_{m, n}$ in document $m$ is drawn from
 
 $$z_{m, n} \sim \textrm{categorical}(\bold{\theta}_m),$$
 
-where $\bold{\theta_b}$ is the document-specific topic-distribution. Next, the word $w_{m, n}$ in document $m$ is drawn from
+where $\bold{\theta_m}$ is the document-specific topic-distribution. Next, the word $w_{m, n}$ in document $m$ is drawn from
 
 $$w_{m, n} \sim \textrm{categorical}(\bold{\phi}_{z[m, n]}),$$
 
@@ -152,7 +152,7 @@ $$\bold{\phi}_k \sim \textrm{Dirichlet}(\bold{\beta}),$$
 
 where $\bold{\beta}$ is the prior a vector of length $V$ (i.e., the total number of words) with positive values.
 
-There are many packages out there that have native support for variational inference. If you want to sue `R`, I recommend using the [`CmdStanR`](https://mc-stan.org/cmdstanr/), which is a lightweight interface to `Stan` for R users. I am not recommending to use the plain `RStan` if you are interested in extracting the ELBO trajectory which it is not at all straightforward with `RStan` without doing some hacking. If you are familiar with `RStan` working with `CmdStanR` not whole that different. For instance, models are defined in the same way is with `SRtan`:
+There are many packages out there that have native support for VI. If you want to sue `R`, I recommend using the [`CmdStanR`](https://mc-stan.org/cmdstanr/), which is a lightweight interface to `Stan` for R users. I am not recommending to use the plain `RStan` if you are interested in extracting the ELBO trajectory which is not at all straightforward with `RStan` without doing some hacking. If you are familiar with `RStan` working with `CmdStanR` is not whole that different. For instance, models are defined in the same way as with `SRtan`:
 
 {{< highlight html >}}
 data {
@@ -191,7 +191,7 @@ Let's fit a two-topic LDA model (i.e., $K = 2$). Before that, I recommend removi
 dtm <- removeSparseTerms(AssociatedPress, 0.95)
 {{< /highlight >}}
 
-You are now ready to fit the LDA model using variational inference capabilities of the `cmdstanr`. The following code achieves the goal:
+You are now ready to fit the LDA model using VI capabilities of the `CmdStanR`. The following code achieves the goal:
 
 {{< highlight html >}}
 LDA_model_cmd <- cmdstan_model(stan_file = "LDA.stan")
@@ -231,7 +231,7 @@ ELBO <- data.frame(Iteration = vi_diag[,1], ELBO = vi_diag[,3])
 {{< /highlight >}}
 
 
-To display the topics that were extracted from the collection of articles based with the LDA you can for example show the 10 most common words for each topic; that is, the parts of distribution $\bold{\phi}_k$, for $k \in \{1,2\}$, with the largest mass.
+To display the topics that were extracted from the collection of articles using the LDA you can show the 10 most common words for each topic; that is, the parts of distribution $\bold{\phi}_k$, for $k \in \{1,2\}$, with the largest mass.
 
 {{< highlight html >}}
 V <- dim(dtm)[2]
@@ -260,4 +260,29 @@ top_words %>%
 <img style="float: Center; margin-left: 7em;"  src="/images/APdistr.png" width="600" height="300">
 {{< /rawhtml >}}
 
-The most common words in topic 1 include **people, government, president, police,** and **state**, suggesting that this topic may represent political news. In contrast, the most common words in topic 2 include **percent, billion, million, market, American,** and **states**, hinting that this topic may represent news about the US economy.
+The most common words in topic 1 include *people, government, president, police,* and *state*, suggesting that this topic may represent political news. In contrast, the most common words in topic 2 include *percent, billion, million, market, American,* and *states*, hinting that this topic may represent news about the US economy. As the final note to document clustering with LDA, I will leave you with the code that creates word clouds with the most common words per topic using the `wordcloud` package.
+
+{{< highlight html >}}
+top_words <- word_probs %>% group_by(Topic) %>% top_n(20) %>%
+              ungroup() %>% arrange(Topic, -Probability)
+
+mycolors <- brewer.pal(8, "Dark2")
+wordcloud(top_words %>% filter(Topic == "Topic 1") %>% .$Word ,
+          top_words %>% filter(Topic == "Topic 1") %>% .$Probability,
+          random.order = FALSE,
+          color = mycolors)
+
+mycolors <- brewer.pal(8, "Dark2")
+wordcloud(top_words %>% filter(Topic == "Topic 2") %>% .$Word ,
+          top_words %>% filter(Topic == "Topic 2") %>% .$Probability,
+          random.order = FALSE,
+          color = mycolors)
+{{< /highlight >}}
+
+{{< rawhtml >}}
+<img style="float: Center; margin-left: 7em;"  src="/images/APWC.png" width="600" height="300">
+{{< /rawhtml >}}
+
+
+
+*This text is an abbreviated version of [Introducing Variational Inference in Statistics and Data Science Curriculum](https://www.tandfonline.com/doi/abs/10.1080/00031305.2023.2232006) also published in The American Statistician.*

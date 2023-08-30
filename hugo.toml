@@ -1,5 +1,5 @@
 baseurl = "http://www.kejzlar.com"
-title = "Vojtech Kejzlar"
+title = "Vojtech Kejzlar, Ph.D."
 theme = "hugo-coder"
 languagecode = "en"
 defaultcontentlanguage = "en"
@@ -15,7 +15,7 @@ id = "G-K5J0TDJRQ3"
 style = "github-dark"
 
 [params]
-  author = "Vojtech Kejzlar"
+  author = "Vojtech Kejzlar, Ph.D."
   info = "Data Scientist, Academic, and Science Educator"
   description = "Vojtech Kejzlar's personal website"
   keywords = "blog,developer,personal"
@@ -66,7 +66,7 @@ style = "github-dark"
   name = "Scholar"
   icon = "fa fa-graduation-cap  fa-2x"
   weight = 4
-  url = "https://scholar.google.com/citations?user=Wq9D-3gAAAAJ&hl=cs"
+  url = "https://scholar.google.com/citations?user=Wq9D-3gAAAAJ&hl=en"
 
 # Menu links
 [[menu.main]]

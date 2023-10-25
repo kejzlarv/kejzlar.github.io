@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  How to: Logistic Regression Pipeline in Python · Vojtech Kejzlar, Ph.D.
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Vojtech Kejzlar, Ph.D.">
+<meta name="description" content="Table of ContentsLink to headingIntroduction Logistic regression overview Exploratory data analysis and feature engineering Model fitting and performance metrics Feature selection Feature importance I recently stumbled upon a really nice Superstore Marketing Campaign Dataset during my weekly (as one does :) ) browsing sessions through Kaggle. The Kaggle data card has great motivation build around the dataset that I am pasting here:
+Context: A superstore is planning for the year-end sale.">
+<meta name="keywords" content="blog,developer,personal">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="How to: Logistic Regression Pipeline in Python"/>
+<meta name="twitter:description" content="Table of ContentsLink to headingIntroduction Logistic regression overview Exploratory data analysis and feature engineering Model fitting and performance metrics Feature selection Feature importance I recently stumbled upon a really nice Superstore Marketing Campaign Dataset during my weekly (as one does :) ) browsing sessions through Kaggle. The Kaggle data card has great motivation build around the dataset that I am pasting here:
+Context: A superstore is planning for the year-end sale."/>
+
+<meta property="og:title" content="How to: Logistic Regression Pipeline in Python" />
+<meta property="og:description" content="Table of ContentsLink to headingIntroduction Logistic regression overview Exploratory data analysis and feature engineering Model fitting and performance metrics Feature selection Feature importance I recently stumbled upon a really nice Superstore Marketing Campaign Dataset during my weekly (as one does :) ) browsing sessions through Kaggle. The Kaggle data card has great motivation build around the dataset that I am pasting here:
+Context: A superstore is planning for the year-end sale." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://www.kejzlar.com/posts/logistic-python/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-10-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-10-10T00:00:00+00:00" />
+
+
+
+
+
+
+<link rel="canonical" href="http://www.kejzlar.com/posts/logistic-python/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4c203b809e10b2f4fdf6608f50491de5f033f19ad4ac34ea60b90164f1193f40.css" integrity="sha256-TCA7gJ4QsvT99mCPUEkd5fAz8ZrUrDTqYLkBZPEZP0A=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css"
+    integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer">
+
+<script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js"
+    integrity="sha384-VQ8d8WVFw0yHhCk5E8I86oOhv48xLpnDZx5T9GogA/Y84DcCKWXDmSDfn13bzFZY"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+    type="text/javascript"></script>
+
+<script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js"
+    integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+    type="text/javascript"></script>
+
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "\\[", right: "\\]", display: true},
+        {left: "$", right: "$", display: false},
+        {left: "\\(", right: "\\)", display: false},
+      ],
+    });
+  });
+</script>
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Vojtech Kejzlar, Ph.D.
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/projects/">Projects</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/publications/">Publications</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://www.kejzlar.com/posts/logistic-python/">
+              How to: Logistic Regression Pipeline in Python
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-10-10T00:00:00Z">
+                October 10, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              12-minute read
+            </span>
+          </div>
+          <div class="authors">
+  <i class="fa fa-user" aria-hidden="true"></i>
+    <a href="/authors/vojtech-kejzlar/">Vojtech Kejzlar</a></div>
+
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/python/">Python</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/logistic-regression/">Logistic regression</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/classification/">Classification</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<h1 id="Introduction">
+  Table of Contents
+  <a class="heading-link" href="#Introduction">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<ol>
+<li><a href="#Introduction" >Introduction</a></li>
+<li><a href="#LRIdea" >Logistic regression overview</a></li>
+<li><a href="#EDA" >Exploratory data analysis and feature engineering</a></li>
+<li><a href="#Fitting" >Model fitting and performance metrics</a></li>
+<li><a href="#RFE" >Feature selection</a></li>
+<li><a href="#Importance" >Feature importance</a></li>
+</ol>
+<p>I recently stumbled upon a really nice <a href="https://www.kaggle.com/datasets/ahsan81/superstore-marketing-campaign-dataset/data"  class="external-link" target="_blank" rel="noopener">Superstore Marketing Campaign Dataset</a> during my weekly (as one does :) ) browsing sessions through Kaggle. The Kaggle data card has great motivation build around the dataset that I am pasting here:</p>
+<p><strong>Context:</strong> A superstore is planning for the year-end sale. They want to launch a new offer - gold membership, that gives a 20% discount on all purchases, for only 499 USD which is 999 USD on other days. It will be valid only for existing customers and the campaign through phone calls is currently being planned for them. The management feels that the best way to reduce the cost of the campaign is to make a predictive model which will classify customers who might purchase the offer.</p>
+<p><strong>Objective:</strong> Build a predictive model of the customers giving a positive response. Identify the different factors/features that which affect the customer&rsquo;s response and their importance.</p>
+<p><strong>Dataset:</strong> Data from last year&rsquo;s campaign that contain information on 2240 Superstore&rsquo;s customers (20 features + id + label).</p>
+<p>I think that this is an awesome case study to show a complete logistic regression pipeline in Python. In particular, this post will go over the following:</p>
+<ul>
+<li>Overview of logistic regression</li>
+<li>Exploratory data analysis and feature engineering</li>
+<li>Model performance metrics (precision, recall, ROC curves etc.)</li>
+<li>Feature selection via Recursive feature elimination and cross-validation</li>
+<li>Model interpretation and feature importance</li>
+</ul>
+<h1 id="LRIdea">
+  Logistic regression overview
+  <a class="heading-link" href="#LRIdea">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Logistic regression model is a popular supervised learning algorithm for binary classification due to its interpretability, solid predictive performance, and intuitive connection to the standard linear regression. The logistic regression model assumes that a binary response $y_i$ follows a Bernoulli distribution with probability of success $p_i$:</p>
+<p>$$y_i \mid  p_i  \sim \textrm{Bernoulli}(p_i).$$</p>
+<p>To relate a feature (predictor) vector $x_i = (x_{1,i}, \dots, x_{p,i})^T$ to the response $y_i$, logistic regression typically considers the natural logarithm of odds $p_i / (1 - p_i)$ (also known as logit) to be a linear function of the predictor variable $x_i$:</p>
+<p>$$\textrm{logit}(p_i) = \textrm{ln} \bigg(\frac{p_i}{1-p_i}\bigg) = \alpha + \beta^T x_i,$$</p>
+<p>with $\alpha$ and $\beta$ being regression coefficients. Note that it is a bit more challenging to interpret the coefficients in the logistic regression than in standard linear regression as $\alpha$ and $\beta$ are directly related to the log odds $p_i / (1 - p_i)$, instead of $p_i$. For example, $e^{\alpha}$ is the odds when the value of predictor $x_i$ is 0, whereas the quantity $e^{\beta}$ refers to the change in odds per unit increase in $x_i$.</p>
+<p>Lastly, by rearranging the terms in the logit equation, one can express the probability of success $p_i$ as</p>
+<p>$$p_i = \frac{e^{\alpha + \beta^T x_i}}{1 + e^{\alpha + \beta^T x_i}}.$$</p>
+<p>The target feature prediction is done by thresholding on $p_i$. That is $y_i = 1$ if $p_i &gt; t$ and $0$ otherwise where $t$ is a fixed threshold between $0$ and $1$. Typically, $t = 0.5$ so that $y_i = 1$ if $p_i &gt; 1-p_i$.</p>
+<h1 id="EDA">
+  Exploratory data analysis and feature engineering
+  <a class="heading-link" href="#EDA">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Let us start by getting a better sense of what dataset we are working with, dealing with (potentially) missing values, and finding out which features might be related to the label variable. To do so we, will make the use of <code>pandas</code>, the go-to package for manipulating rectangular data, <code>numpy</code>, and some data visualization tools in <code>seaborn</code> and <code>matplotlib.pyplot</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span><span style="color:#ff7b72">import</span> <span style="color:#ff7b72">pandas</span> <span style="color:#ff7b72">as</span> <span style="color:#ff7b72">pd</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> <span style="color:#ff7b72">numpy</span> <span style="color:#ff7b72">as</span> <span style="color:#ff7b72">np</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> <span style="color:#ff7b72">seaborn</span> <span style="color:#ff7b72">as</span> <span style="color:#ff7b72">sns</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">import</span> <span style="color:#ff7b72">matplotlib.pyplot</span> <span style="color:#ff7b72">as</span> <span style="color:#ff7b72">plt</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>store_data <span style="color:#ff7b72;font-weight:bold">=</span> pd<span style="color:#ff7b72;font-weight:bold">.</span>read_csv(<span style="color:#a5d6ff">&#34;superstore_data.csv&#34;</span>)
+</span></span><span style="display:flex;"><span>store_data</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Dataset_SS.png" width="965" height="399">
+
+
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>store_data<span style="color:#ff7b72;font-weight:bold">.</span>info()</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Info_SS.png" width="954" height="490">
+
+
+<p>As we can see, the dataset is a mix of quantitative and categorical features which will have to be transformed into dummy variables. Before we get to that, it looks like a few customers have missing information about income. Since proportion of records with missing values is really small compared to the size of the dataset, we can just get rid of the records with missing values.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>store_data <span style="color:#ff7b72;font-weight:bold">=</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>dropna()</span></span></code></pre></div>
+<p>One last step, before moving onto some EDA and creating dummy variables is to deal with the <code>Dt_Customer</code> feature that corresponds to the date of customer&rsquo;s enrollment with the company. One way to use this information is to create a new feature <code>Days_Customer</code> saying how many days has a customer been enrolled with the company.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span><span style="color:#ff7b72">from</span> <span style="color:#ff7b72">datetime</span> <span style="color:#ff7b72">import</span> datetime
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">def</span> <span style="color:#d2a8ff;font-weight:bold">days_since</span>(date1: str, date2: str, day_format: str) <span style="color:#ff7b72;font-weight:bold">-&gt;</span> int:
+</span></span><span style="display:flex;"><span>    <span style="color:#a5d6ff">&#34;&#34;&#34; Date1 - Date2 in days
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    Parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    ----------
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    date1 : str
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">        First date
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    date2 : str
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">        Second date
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    day_format : str
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">        Strong defining the date format
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    Returns
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    -------
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    int
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">        Number of days between date1 and date2
+</span></span></span><span style="display:flex;"><span><span style="color:#a5d6ff">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    d1 <span style="color:#ff7b72;font-weight:bold">=</span> datetime<span style="color:#ff7b72;font-weight:bold">.</span>strptime(date1, day_format)
+</span></span><span style="display:flex;"><span>    d2 <span style="color:#ff7b72;font-weight:bold">=</span> datetime<span style="color:#ff7b72;font-weight:bold">.</span>strptime(date2, day_format)
+</span></span><span style="display:flex;"><span>    diff <span style="color:#ff7b72;font-weight:bold">=</span> d1 <span style="color:#ff7b72;font-weight:bold">-</span> d2
+</span></span><span style="display:flex;"><span>    <span style="color:#ff7b72">return</span> diff<span style="color:#ff7b72;font-weight:bold">.</span>days
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>day_transform <span style="color:#ff7b72;font-weight:bold">=</span> []
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">for</span> index, row <span style="color:#ff7b72;font-weight:bold">in</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>iterrows():
+</span></span><span style="display:flex;"><span>    day_transform<span style="color:#ff7b72;font-weight:bold">.</span>append(days_since(<span style="color:#a5d6ff">&#34;1/1/2023&#34;</span>, row[<span style="color:#a5d6ff">&#34;Dt_Customer&#34;</span>], <span style="color:#a5d6ff">&#34;%m/</span><span style="color:#a5d6ff">%d</span><span style="color:#a5d6ff">/%Y&#34;</span> ))
+</span></span><span style="display:flex;"><span>store_data[<span style="color:#a5d6ff">&#34;Days_Customer&#34;</span>] <span style="color:#ff7b72;font-weight:bold">=</span> np<span style="color:#ff7b72;font-weight:bold">.</span>array(day_transform[:])</span></span></code></pre></div>
+<p>In general, to goal of EDA during logistic regression modeling is to get a sense of what features are important predictors of the label as well as discovering some potential limitation of the dataset. First, we can see that the dataset is not balanced with respect to the number of customers that responded positively to the last year&rsquo;s campaign:</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>sns<span style="color:#ff7b72;font-weight:bold">.</span>catplot(data <span style="color:#ff7b72;font-weight:bold">=</span> store_data, x <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#34;Response&#34;</span>, kind <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#34;count&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Response.png" width="490" height="489">
+
+
+<p>This imbalance can negatively impact the variability of model performance metrics as the proportion of customers with a positive response will be relatively low in the testing dataset. Moving on to exploring the categorical features <code>Education, Marital_Status, Complain, Kidhome,</code> and <code>Teenhome</code>, starting with the <code>Education,</code> we can display a side-by side barplot:</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>sns<span style="color:#ff7b72;font-weight:bold">.</span>countplot(data<span style="color:#ff7b72;font-weight:bold">=</span>store_data, x<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;Education&#34;</span>, hue<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;Response&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Education_simple.png" width="580" height="433">
+
+
+<p>What is the problem here? Since the number of customers differs among the <code>Education</code> groups, it is hard to see which group had a better response to the campaign. This can be simply addressed by looking at the proportions of positive responses within each group:</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>education_feature <span style="color:#ff7b72;font-weight:bold">=</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Education&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>sum() <span style="color:#ff7b72;font-weight:bold">/</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Education&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>count()
+</span></span><span style="display:flex;"><span>education_feature<span style="color:#ff7b72;font-weight:bold">.</span>plot(kind<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;bar&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Education_group.png" width="565" height="496">
+
+
+<p>We can clearly see that the biggest yield was for customers with PhDs and the smallest for customers with a basic education. We can similarly explore all the other categorical variables. It appears that all the other categorical variables will be helpful in predicting which customer will respond positively to a campaign, perhaps with the exception of <code>Complain</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>ms_feature <span style="color:#ff7b72;font-weight:bold">=</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Marital_Status&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>sum() <span style="color:#ff7b72;font-weight:bold">/</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Marital_Status&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>count()
+</span></span><span style="display:flex;"><span>ms_feature<span style="color:#ff7b72;font-weight:bold">.</span>plot(kind<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;bar&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Marital_status.png" width="547" height="480">
+
+
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>complain_feature <span style="color:#ff7b72;font-weight:bold">=</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Complain&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>sum() <span style="color:#ff7b72;font-weight:bold">/</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Complain&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>count()
+</span></span><span style="display:flex;"><span>complain_feature<span style="color:#ff7b72;font-weight:bold">.</span>plot(kind<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;bar&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Complain.png" width="565" height="427">
+
+
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>kid_feature <span style="color:#ff7b72;font-weight:bold">=</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Kidhome&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>sum() <span style="color:#ff7b72;font-weight:bold">/</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Kidhome&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>count()
+</span></span><span style="display:flex;"><span>kid_feature<span style="color:#ff7b72;font-weight:bold">.</span>plot(kind<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;bar&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Kidhome.png" width="565" height="427">
+
+
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>teen_feature <span style="color:#ff7b72;font-weight:bold">=</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Teenhome&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>sum() <span style="color:#ff7b72;font-weight:bold">/</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>groupby(<span style="color:#a5d6ff">&#34;Teenhome&#34;</span>)[<span style="color:#a5d6ff">&#34;Response&#34;</span>]<span style="color:#ff7b72;font-weight:bold">.</span>count()
+</span></span><span style="display:flex;"><span>teen_feature<span style="color:#ff7b72;font-weight:bold">.</span>plot(kind<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;bar&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Teenhome.png" width="565" height="427">
+
+
+<p>To see the relationships between the quantitative features and the label, we want to compare the distributions of given quantitative feature for customers with positive and negative responses. This can be done using side-by-side boxplot or more clearly, using the <code>sns.pointplot()</code> that displays the means of each group together with their confidence intervals:</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>quantitative_features <span style="color:#ff7b72;font-weight:bold">=</span> np<span style="color:#ff7b72;font-weight:bold">.</span>logical_not(np<span style="color:#ff7b72;font-weight:bold">.</span>isin(store_data<span style="color:#ff7b72;font-weight:bold">.</span>columns<span style="color:#ff7b72;font-weight:bold">.</span>values, [<span style="color:#a5d6ff">&#34;Id&#34;</span>, <span style="color:#a5d6ff">&#34;Teenhome&#34;</span>, <span style="color:#a5d6ff">&#34;Kidhome&#34;</span>, <span style="color:#a5d6ff">&#34;Education&#34;</span>, <span style="color:#a5d6ff">&#34;Complain&#34;</span>, <span style="color:#a5d6ff">&#34;Marital_Status&#34;</span>, <span style="color:#a5d6ff">&#34;Dt_Customer&#34;</span>, <span style="color:#a5d6ff">&#34;Response&#34;</span>]))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fig, axes <span style="color:#ff7b72;font-weight:bold">=</span> plt<span style="color:#ff7b72;font-weight:bold">.</span>subplots(<span style="color:#a5d6ff">4</span>, <span style="color:#a5d6ff">4</span>, figsize<span style="color:#ff7b72;font-weight:bold">=</span>(<span style="color:#a5d6ff">20</span>, <span style="color:#a5d6ff">15</span>))
+</span></span><span style="display:flex;"><span>plot_counter <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">for</span> column <span style="color:#ff7b72;font-weight:bold">in</span> store_data<span style="color:#ff7b72;font-weight:bold">.</span>columns[quantitative_features]:
+</span></span><span style="display:flex;"><span>    sns<span style="color:#ff7b72;font-weight:bold">.</span>pointplot(ax<span style="color:#ff7b72;font-weight:bold">=</span>axes[plot_counter <span style="color:#ff7b72;font-weight:bold">//</span> <span style="color:#a5d6ff">4</span>, plot_counter <span style="color:#ff7b72;font-weight:bold">%</span> <span style="color:#a5d6ff">4</span>], data<span style="color:#ff7b72;font-weight:bold">=</span>store_data, x<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;Response&#34;</span>, y<span style="color:#ff7b72;font-weight:bold">=</span>column, kind<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;point&#34;</span>)
+</span></span><span style="display:flex;"><span>    plot_counter <span style="color:#ff7b72;font-weight:bold">+=</span> <span style="color:#a5d6ff">1</span>
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Logistic_python/Quantitative.png" width="830" height="609">
+
+
+<p>In order to fit the logistic regression model for the superstore customers, we need to transform the categorical features into (indicator) dummy variables and split the dataset into a training and testing dataset.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>store_data_dummies <span style="color:#ff7b72;font-weight:bold">=</span> pd<span style="color:#ff7b72;font-weight:bold">.</span>DataFrame()
+</span></span><span style="display:flex;"><span>cat_features <span style="color:#ff7b72;font-weight:bold">=</span> [<span style="color:#a5d6ff">&#34;Teenhome&#34;</span>, <span style="color:#a5d6ff">&#34;Kidhome&#34;</span>, <span style="color:#a5d6ff">&#34;Education&#34;</span>, <span style="color:#a5d6ff">&#34;Complain&#34;</span>, <span style="color:#a5d6ff">&#34;Marital_Status&#34;</span>]
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">for</span> feature <span style="color:#ff7b72;font-weight:bold">in</span> cat_features:
+</span></span><span style="display:flex;"><span>    data_var <span style="color:#ff7b72;font-weight:bold">=</span>  pd<span style="color:#ff7b72;font-weight:bold">.</span>get_dummies(store_data[feature], prefix<span style="color:#ff7b72;font-weight:bold">=</span>feature)
+</span></span><span style="display:flex;"><span>    store_data_dummies[data_var<span style="color:#ff7b72;font-weight:bold">.</span>columns] <span style="color:#ff7b72;font-weight:bold">=</span> data_var
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data_final <span style="color:#ff7b72;font-weight:bold">=</span> pd<span style="color:#ff7b72;font-weight:bold">.</span>concat([store_data[<span style="color:#a5d6ff">&#34;Response&#34;</span>], store_data[store_data<span style="color:#ff7b72;font-weight:bold">.</span>columns[quantitative_features]], store_data_dummies], axis <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">from</span> <span style="color:#ff7b72">sklearn.model_selection</span> <span style="color:#ff7b72">import</span> train_test_split
+</span></span><span style="display:flex;"><span>X_train, X_test, y_train, y_test <span style="color:#ff7b72;font-weight:bold">=</span> train_test_split(data_final<span style="color:#ff7b72;font-weight:bold">.</span>iloc[:,data_final<span style="color:#ff7b72;font-weight:bold">.</span>columns <span style="color:#ff7b72;font-weight:bold">!=</span> <span style="color:#a5d6ff">&#34;Response&#34;</span>],
+</span></span><span style="display:flex;"><span>                                                    data_final[<span style="color:#a5d6ff">&#34;Response&#34;</span>], test_size<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">0.33</span>, random_state<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">123</span>)</span></span></code></pre></div>
+<p>One last thing (I promise), it is a good idea to standardize the quantitative features before model fitting. To see why, we should discuss how to assess feature importance. For simplicity, consider a logistic regression model with a single (quantitative) feature. If we increase the feature by 1 the change in odds $p_i / (1-p_i)$ will be proportional to the magnitude of the coefficient $\beta$. This means that one way to assess feature importance is to compare the size of $\beta$ coefficients. However, if the features have different scales or units, the model may give higher coefficients (thus higher importance) to the features with larger values, even if they are not necessarily more important.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span><span style="color:#ff7b72">from</span> <span style="color:#ff7b72">sklearn.preprocessing</span> <span style="color:#ff7b72">import</span> StandardScaler
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>scaler <span style="color:#ff7b72;font-weight:bold">=</span> StandardScaler()
+</span></span><span style="display:flex;"><span>X_train<span style="color:#ff7b72;font-weight:bold">.</span>loc[:, store_data<span style="color:#ff7b72;font-weight:bold">.</span>columns[quantitative_features]] <span style="color:#ff7b72;font-weight:bold">=</span> scaler<span style="color:#ff7b72;font-weight:bold">.</span>fit_transform(X_train<span style="color:#ff7b72;font-weight:bold">.</span>loc[:, store_data<span style="color:#ff7b72;font-weight:bold">.</span>columns[quantitative_features]]<span style="color:#ff7b72;font-weight:bold">.</span>values)
+</span></span><span style="display:flex;"><span>X_test<span style="color:#ff7b72;font-weight:bold">.</span>loc[:, store_data<span style="color:#ff7b72;font-weight:bold">.</span>columns[quantitative_features]] <span style="color:#ff7b72;font-weight:bold">=</span> scaler<span style="color:#ff7b72;font-weight:bold">.</span>transform(X_test<span style="color:#ff7b72;font-weight:bold">.</span>loc[:, store_data<span style="color:#ff7b72;font-weight:bold">.</span>columns[quantitative_features]]<span style="color:#ff7b72;font-weight:bold">.</span>values)</span></span></code></pre></div>
+<h1 id="Fitting">
+  Model fitting and performance metrics
+  <a class="heading-link" href="#Fitting">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>There are many Python packages that implement logistic regression, we will use one of the most popular packages <code>sklearn</code> for ML modeling which also (conveniently) implements metrics that will be used to assess the quality of our model.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span><span style="color:#ff7b72">from</span> <span style="color:#ff7b72">sklearn.linear_model</span> <span style="color:#ff7b72">import</span> LogisticRegression
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>logreg <span style="color:#ff7b72;font-weight:bold">=</span> LogisticRegression(solver <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#39;liblinear&#39;</span>, random_state <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">0</span>, max_iter<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">1000</span>, penalty <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#39;l2&#39;</span>)
+</span></span><span style="display:flex;"><span>logreg<span style="color:#ff7b72;font-weight:bold">.</span>fit(X_train, y_train)</span></span></code></pre></div>
+<p>I suggest to go over the <code>LogisticRegression</code> <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html"  class="external-link" target="_blank" rel="noopener">documentation</a> to understand each of the inputs above (we are using L2 regularization to protect against overfitting). The simplest metric to assess quality of the <code>logreg</code> model is <strong>accuracy</strong> of predictions in hold-out data. That is how good is the model in predicting whether customer responds positively or negatively based on customers&rsquo; features.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>y_pred <span style="color:#ff7b72;font-weight:bold">=</span> logreg<span style="color:#ff7b72;font-weight:bold">.</span>predict(X_test)
+</span></span><span style="display:flex;"><span>print(<span style="color:#a5d6ff">&#39;Accuracy of logistic regression classifier on test set: </span><span style="color:#a5d6ff">{:.2f}</span><span style="color:#a5d6ff">&#39;</span><span style="color:#ff7b72;font-weight:bold">.</span>format(logreg<span style="color:#ff7b72;font-weight:bold">.</span>score(X_test, y_test)))</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Logistic_python/Accuracy_full.png" width="965" height="30">
+
+
+<p>Our model correctly predicted the behavior of 86% of customers in the testing set. The problem of assessing model performance solely based on accuracy is that we ignore how model does within each class. For that reason, it is helpful to consider the following:</p>
+<ul>
+<li><strong>True positives</strong>: Correctly predicted positives (ones)</li>
+<li><strong>True negatives</strong>: Correctly predicted negatives (zeros)</li>
+<li><strong>False negatives</strong>: Incorrectly predicted negatives</li>
+<li><strong>False positives</strong>: Incorrectly predicted positives</li>
+<li><strong>Sensitivity</strong> (also known as <strong>true positive rate</strong> or <strong>recall</strong>): Ratio of the number of true positives to the number of actual positives. It says what proportion of actual positives was identified correctly.</li>
+<li><strong>Specificity</strong> (also known as <strong>true negative rate</strong>): Ratio of the number of true negatives to the number of actual negatives.  It says what proportion of actual negatives was identified correctly.</li>
+<li><strong>Precision</strong> (also known as <strong>positive predictive rate</strong>): Ratio of the number of true positives to the number of positive predictions (TP / (TP + FP)). It says what proportion of positive identifications was actually correct?</li>
+<li><strong>Fall-out</strong> (also known as <strong>false positive rate</strong>): Ratio of the number of false positives to the number of actual negatives (1 - Specificity). It says what is the proportion of negatives that were incorrectly classified as positives.</li>
+</ul>
+<p>You can read about these and (many) other useful metrics <a href="https://en.wikipedia.org/wiki/Sensitivity_and_specificity"  class="external-link" target="_blank" rel="noopener">here</a>. You can compute all of these from a <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html"  class="external-link" target="_blank" rel="noopener">confusion matrix</a> that gives information about TN ($C_{0,0}$), FN ($C_{1,0}$), FP ($C_{0,1}$), and TP (($C_{1,1}$)):</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span><span style="color:#ff7b72">from</span> <span style="color:#ff7b72">sklearn.metrics</span> <span style="color:#ff7b72">import</span> confusion_matrix
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>confusion_matrix <span style="color:#ff7b72;font-weight:bold">=</span> confusion_matrix(y_test, y_pred)
+</span></span><span style="display:flex;"><span>print(confusion_matrix)</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Logistic_python/Confusion_full.png" width="954" height="36">
+
+
+<p>If you do the math, we get:</p>
+<table>
+<thead>
+<tr>
+<th>Recall</th>
+<th>Specificity</th>
+<th>Precision</th>
+<th>Fall-out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.41</td>
+<td>0.95</td>
+<td>0.58</td>
+<td>0.05</td>
+</tr>
+</tbody>
+</table>
+<p>The shortcoming of all the quantities that we just computed that they depend on the value of the classification threshold. Popular metrics used for classification are the <a href="https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc"  class="external-link" target="_blank" rel="noopener">Receiver Operating Characteristics</a> (ROC) curve and the area under the ROC curve (AUC). The ROC curve a plot of true positive rate (recall) vs false positive rate (fall-out) shows the performance of classifier at various classification thresholds. Lowering the classification threshold classifies more items as positive, thus increasing both false positives and true positives. The AUC measures the entire two-dimensional area underneath the entire ROC curve. AUC provides an aggregate measure of performance across all possible classification thresholds. AUC ranges in value from 0 to 1. A model whose predictions are 100% wrong has an AUC of 0.0; one whose predictions are 100% correct has an AUC of 1.0. A model that assigns a class label randomly will have AUC 0.5. Therefore the higher the AUC, the better the classifier irrespective of the classification threshold. Fortunately, <code>sklearn</code> has a pre-build functions that make printing the ROC curves and computing AUC simple.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span><span style="color:#ff7b72">from</span> <span style="color:#ff7b72">sklearn.metrics</span> <span style="color:#ff7b72">import</span> roc_auc_score
+</span></span><span style="display:flex;"><span><span style="color:#ff7b72">from</span> <span style="color:#ff7b72">sklearn.metrics</span> <span style="color:#ff7b72">import</span> roc_curve
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>logit_roc_auc <span style="color:#ff7b72;font-weight:bold">=</span> roc_auc_score(y_test, logreg<span style="color:#ff7b72;font-weight:bold">.</span>predict(X_test))
+</span></span><span style="display:flex;"><span>fpr, tpr, thresholds <span style="color:#ff7b72;font-weight:bold">=</span> roc_curve(y_test, logreg<span style="color:#ff7b72;font-weight:bold">.</span>predict_proba(X_test)[:,<span style="color:#a5d6ff">1</span>])
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>figure()
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>plot(fpr, tpr, label<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;Logistic Regression (area = </span><span style="color:#a5d6ff">%0.2f</span><span style="color:#a5d6ff">)&#39;</span> <span style="color:#ff7b72;font-weight:bold">%</span> logit_roc_auc)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>legend(loc<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;lower right&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>xlabel(<span style="color:#a5d6ff">&#39;FPR&#39;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>ylabel(<span style="color:#a5d6ff">&#39;TPR&#39;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/ROC_full.png" width="567" height="432">
+
+
+<h1 id="RFE">
+  Feature selection
+  <a class="heading-link" href="#RFE">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>It is not always a good idea to keep all the features in the model. Using features that are not related to the target label can negatively affect the model&rsquo;s performance. Again, there are many ways to do feature selection, often though, they are some version of backward elimination when you start with the full model and systematically remove the least important features. The Recursive Feature Elimination (RFE) with cross-validation accomplishes this by recursively eliminating features based on the model performance improvement estimated using cross-validation. The final number of features select so that including more features in the model will not significantly improve its performance.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span><span style="color:#ff7b72">from</span> <span style="color:#ff7b72">sklearn.feature_selection</span> <span style="color:#ff7b72">import</span> RFECV
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>rfecv <span style="color:#ff7b72;font-weight:bold">=</span> RFECV(estimator<span style="color:#ff7b72;font-weight:bold">=</span>logreg, scoring <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#39;accuracy&#39;</span>, min_features_to_select <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">1</span>)
+</span></span><span style="display:flex;"><span>rfecv<span style="color:#ff7b72;font-weight:bold">.</span>fit(X_train, y_train)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#79c0ff">f</span><span style="color:#a5d6ff">&#34;Optimal number of features: </span><span style="color:#a5d6ff">{</span>rfecv<span style="color:#ff7b72;font-weight:bold">.</span>n_features_<span style="color:#a5d6ff">}</span><span style="color:#a5d6ff">&#34;</span>)</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Logistic_python/RFECV.png" width="954" height="19">
+
+
+<p>Now, we can go ahead and fit the reduced model.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>logreg_final <span style="color:#ff7b72;font-weight:bold">=</span> LogisticRegression(solver <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#39;liblinear&#39;</span>, random_state <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">0</span>, max_iter<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">1000</span>, penalty <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#39;l2&#39;</span>)
+</span></span><span style="display:flex;"><span>logreg_final<span style="color:#ff7b72;font-weight:bold">.</span>fit(X_train<span style="color:#ff7b72;font-weight:bold">.</span>iloc[:, rfecv<span style="color:#ff7b72;font-weight:bold">.</span>support_], y_train)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>y_pred <span style="color:#ff7b72;font-weight:bold">=</span> logreg_final<span style="color:#ff7b72;font-weight:bold">.</span>predict(X_test<span style="color:#ff7b72;font-weight:bold">.</span>iloc[:, rfecv<span style="color:#ff7b72;font-weight:bold">.</span>support_])
+</span></span><span style="display:flex;"><span>print(<span style="color:#a5d6ff">&#39;Accuracy of logistic regression classifier on test set: </span><span style="color:#a5d6ff">{:.2f}</span><span style="color:#a5d6ff">&#39;</span><span style="color:#ff7b72;font-weight:bold">.</span>format(logreg_final<span style="color:#ff7b72;font-weight:bold">.</span>score(X_test<span style="color:#ff7b72;font-weight:bold">.</span>iloc[:, rfecv<span style="color:#ff7b72;font-weight:bold">.</span>support_], y_test)))</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Logistic_python/Accuracy_full.png" width="965" height="30">
+
+
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>confusion_matrix <span style="color:#ff7b72;font-weight:bold">=</span> confusion_matrix(y_test, y_pred)
+</span></span><span style="display:flex;"><span>print(confusion_matrix)</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Logistic_python/Confusion_final.png" width="954" height="36">
+
+
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>logit_roc_auc <span style="color:#ff7b72;font-weight:bold">=</span> roc_auc_score(y_test, logreg_final<span style="color:#ff7b72;font-weight:bold">.</span>predict(X_test<span style="color:#ff7b72;font-weight:bold">.</span>iloc[:, rfecv<span style="color:#ff7b72;font-weight:bold">.</span>support_]))
+</span></span><span style="display:flex;"><span>fpr, tpr, thresholds <span style="color:#ff7b72;font-weight:bold">=</span> roc_curve(y_test, logreg_final<span style="color:#ff7b72;font-weight:bold">.</span>predict_proba(X_test<span style="color:#ff7b72;font-weight:bold">.</span>iloc[:, rfecv<span style="color:#ff7b72;font-weight:bold">.</span>support_])[:,<span style="color:#a5d6ff">1</span>])
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>figure()
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>plot(fpr, tpr, label<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;Logistic Regression (area = </span><span style="color:#a5d6ff">%0.2f</span><span style="color:#a5d6ff">)&#39;</span> <span style="color:#ff7b72;font-weight:bold">%</span> logit_roc_auc)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>legend(loc<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#34;lower right&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>xlabel(<span style="color:#a5d6ff">&#39;FPR&#39;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>ylabel(<span style="color:#a5d6ff">&#39;TPR&#39;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/ROC_smaller.png" width="567" height="432">
+
+
+<p>It turns out that the reduced model has practically identical performance with the full model, however, using only 26 features instead of 36.</p>
+<h1 id="Importance">
+  Feature importance
+  <a class="heading-link" href="#Importance">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>What&rsquo;s left is to take the final model and plot the importance of the 26 selected features based on their coefficients&rsquo; magnitude. To make the interpretation of feature importance even more granular, we can distinguish between positive and negative coefficients.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Python" data-lang="Python"><span style="display:flex;"><span>coefficients <span style="color:#ff7b72;font-weight:bold">=</span> logreg_final<span style="color:#ff7b72;font-weight:bold">.</span>coef_
+</span></span><span style="display:flex;"><span>importance <span style="color:#ff7b72;font-weight:bold">=</span> np<span style="color:#ff7b72;font-weight:bold">.</span>abs(coefficients)
+</span></span><span style="display:flex;"><span>colors <span style="color:#ff7b72;font-weight:bold">=</span> [<span style="color:#a5d6ff">&#39;royalblue&#39;</span> <span style="color:#ff7b72">if</span> i <span style="color:#ff7b72;font-weight:bold">==</span> <span style="color:#a5d6ff">1.0</span> <span style="color:#ff7b72">else</span> <span style="color:#a5d6ff">&#39;salmon&#39;</span> <span style="color:#ff7b72">for</span> i <span style="color:#ff7b72;font-weight:bold">in</span> np<span style="color:#ff7b72;font-weight:bold">.</span>sign(coefficients)<span style="color:#ff7b72;font-weight:bold">.</span>flatten()]
+</span></span><span style="display:flex;"><span>feature_importance <span style="color:#ff7b72;font-weight:bold">=</span> pd<span style="color:#ff7b72;font-weight:bold">.</span>DataFrame({<span style="color:#a5d6ff">&#39;Feature&#39;</span>: X_train<span style="color:#ff7b72;font-weight:bold">.</span>iloc[:, rfecv<span style="color:#ff7b72;font-weight:bold">.</span>support_]<span style="color:#ff7b72;font-weight:bold">.</span>columns, <span style="color:#a5d6ff">&#39;Importance&#39;</span>: importance<span style="color:#ff7b72;font-weight:bold">.</span>flatten()})
+</span></span><span style="display:flex;"><span>feature_importance <span style="color:#ff7b72;font-weight:bold">=</span> feature_importance<span style="color:#ff7b72;font-weight:bold">.</span>sort_values(<span style="color:#a5d6ff">&#39;Importance&#39;</span>, ascending<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#79c0ff">True</span>)
+</span></span><span style="display:flex;"><span>feature_importance<span style="color:#ff7b72;font-weight:bold">.</span>iloc[<span style="color:#ff7b72;font-weight:bold">-</span><span style="color:#a5d6ff">20</span>:,:]<span style="color:#ff7b72;font-weight:bold">.</span>plot(x<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;Feature&#39;</span>, y<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;Importance&#39;</span>, color <span style="color:#ff7b72;font-weight:bold">=</span> colors, kind<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">&#39;barh&#39;</span>, figsize<span style="color:#ff7b72;font-weight:bold">=</span>(<span style="color:#a5d6ff">10</span>, <span style="color:#a5d6ff">6</span>))
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>xlabel(<span style="color:#a5d6ff">&#34;Importance&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>legend(<span style="color:#a5d6ff">&#39;&#39;</span>,frameon<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#79c0ff">False</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#ff7b72;font-weight:bold">.</span>show()</span></span></code></pre></div>
+
+
+<img style="float: Center;"  src="/images/Logistic_python/Features.png" width="1001" height="525">
+
+
+<p>What did we learn from the figure above? First, the categorical features are more important than the quantitative as they are higher ranked. Then, the marital status is the most important feature with the likelihood of positive response to the campaign being smallest for the people who are &ldquo;Together&rdquo;. Additionally, our feature <code>Days_Customers</code> appears to be fairly influential in determining the success of campaign. More faithful customers are more likely to respond positively. Lastly, note that the negative value of <code>Recency</code> together with the fact that we standardized the quantitative features means that customers that shopped recently will be more likely to respond positively (- * - = +) than those who haven&rsquo;t shopped in a while.</p>
+
+      </div>
+
+
+      <footer>
+        
+
+<section class="see-also">
+  
+    
+    
+    
+  
+</section>
+
+
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+      2020 -
+    
+    2023
+     Vojtech Kejzlar, Ph.D. 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K5J0TDJRQ3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-K5J0TDJRQ3');
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

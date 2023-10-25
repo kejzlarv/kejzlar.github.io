@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Variational Inference on Vojtech Kejzlar, Ph.D.</title>
+    <link>http://www.kejzlar.com/tags/variational-inference/</link>
+    <description>Recent content in Variational Inference on Vojtech Kejzlar, Ph.D.</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 10 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="http://www.kejzlar.com/tags/variational-inference/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Variational Inference - scalable UQ for probabilistic models</title>
+      <link>http://www.kejzlar.com/posts/vi-tutorial/</link>
+      <pubDate>Thu, 10 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/posts/vi-tutorial/</guid>
+      <description>Table of ContentsLink to headingIntroduction Idea behind variational inference Variational families ELBO optimization Estimating the average number of active players in an mmorpg Document clustering with LDA Probabilistic models like logistic regression, Bayesian classification, neural networks, and models for natural language processing, are increasingly more present in the world of data science and machine learning. If you want to use these models for reliable infernce (such as prediction), you should always do your best to carry out some type of uncertainty quantification (UQ) which will give you a good idea about the limits of models you used.</description>
+    </item>
+    
+  </channel>
+</rss>

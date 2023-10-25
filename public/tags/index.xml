@@ -1,10 +1,74 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on Vojtech Kejzlar</title>
+    <title>Tags on Vojtech Kejzlar, Ph.D.</title>
     <link>http://www.kejzlar.com/tags/</link>
-    <description>Recent content in Tags on Vojtech Kejzlar</description>
+    <description>Recent content in Tags on Vojtech Kejzlar, Ph.D.</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language><atom:link href="http://www.kejzlar.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en</language>
+    <lastBuildDate>Tue, 10 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="http://www.kejzlar.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Classification</title>
+      <link>http://www.kejzlar.com/tags/classification/</link>
+      <pubDate>Tue, 10 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/tags/classification/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Logistic regression</title>
+      <link>http://www.kejzlar.com/tags/logistic-regression/</link>
+      <pubDate>Tue, 10 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/tags/logistic-regression/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Python</title>
+      <link>http://www.kejzlar.com/tags/python/</link>
+      <pubDate>Tue, 10 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/tags/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>LDA</title>
+      <link>http://www.kejzlar.com/tags/lda/</link>
+      <pubDate>Thu, 10 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/tags/lda/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R</title>
+      <link>http://www.kejzlar.com/tags/r/</link>
+      <pubDate>Thu, 10 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>UQ</title>
+      <link>http://www.kejzlar.com/tags/uq/</link>
+      <pubDate>Thu, 10 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/tags/uq/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Variational Inference</title>
+      <link>http://www.kejzlar.com/tags/variational-inference/</link>
+      <pubDate>Thu, 10 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.kejzlar.com/tags/variational-inference/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+  Variational Inference - scalable UQ for probabilistic models · Vojtech Kejzlar, Ph.D.
+</title>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+
+
+
+
+<meta name="author" content="Vojtech Kejzlar, Ph.D.">
+<meta name="description" content="A brief guide to setup KaTeX">
+<meta name="keywords" content="blog,developer,personal">
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Variational Inference - scalable UQ for probabilistic models"/>
+<meta name="twitter:description" content="A brief guide to setup KaTeX"/>
+
+<meta property="og:title" content="Variational Inference - scalable UQ for probabilistic models" />
+<meta property="og:description" content="A brief guide to setup KaTeX" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://www.kejzlar.com/posts/vi-tutorial/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-08-10T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-08-10T00:00:00+00:00" />
+
+
+
+
+
+
+<link rel="canonical" href="http://www.kejzlar.com/posts/vi-tutorial/">
+
+
+<link rel="preload" href="/fonts/forkawesome-webfont.woff2?v=1.2.0" as="font" type="font/woff2" crossorigin>
+
+
+  
+  
+  <link rel="stylesheet" href="/css/coder.min.4c203b809e10b2f4fdf6608f50491de5f033f19ad4ac34ea60b90164f1193f40.css" integrity="sha256-TCA7gJ4QsvT99mCPUEkd5fAz8ZrUrDTqYLkBZPEZP0A=" crossorigin="anonymous" media="screen" />
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg" sizes="any">
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+
+
+
+
+
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css"
+    integrity="sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer">
+
+<script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js"
+    integrity="sha384-VQ8d8WVFw0yHhCk5E8I86oOhv48xLpnDZx5T9GogA/Y84DcCKWXDmSDfn13bzFZY"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+    type="text/javascript"></script>
+
+<script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js"
+    integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+    type="text/javascript"></script>
+
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "\\[", right: "\\]", display: true},
+        {left: "$", right: "$", display: false},
+        {left: "\\(", right: "\\)", display: false},
+      ],
+    });
+  });
+</script>
+
+
+</head>
+
+
+
+
+<body class="preload-transitions colorscheme-light">
+  
+
+  <main class="wrapper">
+    <nav class="navigation">
+  <section class="container">
+    <a class="navigation-title" href="/">
+      Vojtech Kejzlar, Ph.D.
+    </a>
+    
+      <input type="checkbox" id="menu-toggle" />
+      <label class="menu-button float-right" for="menu-toggle">
+        <i class="fa fa-bars fa-fw" aria-hidden="true"></i>
+      </label>
+      <ul class="navigation-list">
+        
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/about/">About</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/projects/">Projects</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/publications/">Publications</a>
+            </li>
+          
+            <li class="navigation-item">
+              <a class="navigation-link" href="/posts/">Blog</a>
+            </li>
+          
+        
+        
+      </ul>
+    
+  </section>
+</nav>
+
+
+    <div class="content">
+      
+  <section class="container post">
+    <article>
+      <header>
+        <div class="post-title">
+          <h1 class="title">
+            <a class="title-link" href="http://www.kejzlar.com/posts/vi-tutorial/">
+              Variational Inference - scalable UQ for probabilistic models
+            </a>
+          </h1>
+        </div>
+        <div class="post-meta">
+          <div class="date">
+            <span class="posted-on">
+              <i class="fa fa-calendar" aria-hidden="true"></i>
+              <time datetime="2023-08-10T00:00:00Z">
+                August 10, 2023
+              </time>
+            </span>
+            <span class="reading-time">
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              13-minute read
+            </span>
+          </div>
+          <div class="authors">
+  <i class="fa fa-user" aria-hidden="true"></i>
+    <a href="/authors/vojtech-kejzlar/">Vojtech Kejzlar</a></div>
+
+          
+          <div class="tags">
+  <i class="fa fa-tag" aria-hidden="true"></i>
+    <span class="tag">
+      <a href="/tags/r/">R</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/variational-inference/">Variational Inference</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/uq/">UQ</a>
+    </span>
+      <span class="separator">•</span>
+    <span class="tag">
+      <a href="/tags/lda/">LDA</a>
+    </span></div>
+
+        </div>
+      </header>
+
+      <div class="post-content">
+        
+        <!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<h1 id="Introduction">
+  Table of Contents
+  <a class="heading-link" href="#Introduction">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<ol>
+<li><a href="#Introduction" >Introduction</a></li>
+<li><a href="#ViIdea" >Idea behind variational inference</a></li>
+<li><a href="#Families" >Variational families</a></li>
+<li><a href="#Optimization" >ELBO optimization</a></li>
+<li><a href="#Mmorpg" >Estimating the average number of active players in an mmorpg</a></li>
+<li><a href="#Lda" >Document clustering with LDA</a></li>
+</ol>
+<p>Probabilistic models like logistic regression, Bayesian classification, neural networks, and models for natural language processing, are increasingly more present in the world of data science and machine learning. If you want to use these models for reliable infernce (such as prediction), you should always do your best to carry out some type of uncertainty quantification (UQ) which will give you a good idea about the limits of models you used. Bayesian statistics is typically the go-to method for UQ, because it allows to naturally express uncertainties in the language of probability.</p>
+<p>In many settings, a central task task in UQ of probabilistic models is the evaluation of posterior distribution $p(\bold{\theta} \mid \bold{y})$ of $m$ model parameters conditioned on the observed data $\bold{y} = (y_1, \dots,  y_n)$ provided by the Bayes’ theorem</p>
+<p>$$ p(\bold{\theta} \mid \bold{y})  = \frac{p(\bold{y} \mid \bold{\theta})p(\bold{\theta})}{p(\bold{y})} \propto p(\bold{y} \mid \bold{\theta})p(\bold{\theta}).$$</p>
+<p>Here, $p(\bold{y} \mid \bold{\theta})$ is the sampling density given by the underlying
+probabilistic model for data, $p(\bold{\theta})$ is the prior density that represents our prior beliefs about $\bold{\theta}$ before seeing the data, and $p(\bold{y})$ is the marginal data distribution. The posterior distribution, however, has closed form only in a limited number of scenarios (e.g., conjugate priors) and therefore typically requires approximation. By far the most popular approximation methods are Markov chain Monte Carlo (MCMC) algorithms including Gibbs sampler, Metropolis, Metropolis-Hastings, and Hamiltonian Monte Carlo (See the <a href="http://www.stat.columbia.edu/~gelman/book/BDA3.pdf"  class="external-link" target="_blank" rel="noopener">Bayesian bible</a> for overview of these methods). While useful for simple models with moderately-sized dataset, these MCMC algorithms do not scale well with large datasets and can have a hard time approximating multimodal posteriors. These challenges limit the applications of probabilistic models with massive datasets needed to train neural networks, pattern recognition algorithms, or models for natural language processing. In the rest of this post, I want to give you a gentle introduction to Variational inference, which is an alternative to the sampling-based approximation via MCMC that approximates a target density through optimization and tends to scale well to massive dataset.</p>
+<h1 id="ViIdea">
+  Idea behind variational inference
+  <a class="heading-link" href="#ViIdea">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>The main idea behind variational inference is to approximate the target probability density $p(\bold{\theta} \mid \bold{y})$ by a member of some relatively simple family of densities $q(\bold{\theta} \mid \bold{\lambda})$, indexed by the variational parameter $\bold{\lambda} \in \mathbb{R}^{m}$ ($m \geq 1$), over the space of model parameters $\bold{\theta}$. Note that $\bold{\lambda}=(\lambda_1, \dots, \lambda_m)$ has $m$ components of (potentially) varying dimensions. Variational approximation is done by finding the member of variational family that minimizes the Kullback-Leibler (KL) divergence of $q(\bold{\theta} \mid \bold{\lambda})$ from $p(\bold{\theta} \mid \bold{y})$:</p>
+<p>$$q^* = \argmin_{q(\bold{\theta} \mid \bold{\lambda})} KL(q(\bold{\theta} \mid \bold{\lambda})||p(\bold{\theta} \mid \bold{y})), $$</p>
+<p>with KL divergence being the expectation of the log ratio between the $q(\bold{\theta} \mid \bold{\lambda})$ and $p(\bold{\theta} \mid \bold{y})$ with respect to $q(\bold{\theta} \mid \bold{\lambda})$. Intuitively (though it is not exactly true), the KL divergence measures how different is the variational approximation from the posterior distribution. In a nutshell, rather than sampling, variational inference approximates densities using optimization, i.e., by finding the values of variational parameters which lead to a variational distribution that is close to the target posterior distribution. See the figure below for a graphical illustration of this idea.</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+
+
+<img style="float: Center; margin-left: 10em;"  src="/images/VIidea.png" width="510" height="300">
+
+
+<p>Finding the optimal $q^*$ is done in practice by maximizing an equivalent objective function, $\mathcal{L}(\bold{\lambda})$, the <strong>evidence lower bound</strong> (ELBO), because the KL divergence is intractable as it requires the evaluation of the marginal distribution $p(\bold{y})$:</p>
+<p>$$\mathcal{L}(\bold{\lambda}) = \mathbb{E}_q[\log p(\bold{y}, \bold{\theta}) - \log q(\bold{\theta}|\bold{\lambda)} ] $$</p>
+<h1 id="Families">
+  Variational families
+  <a class="heading-link" href="#Families">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Let&rsquo;s now move on to the implementation details of variational inference starting with the selection of the variational family $q(\bold{\theta} \mid \bold{\lambda})$. This choice is crucial as it affects the complexity of optimization as well as the quality of variational approximation.</p>
+<h3 id="mean-field-variational-family">
+  Mean-field Variational Family
+  <a class="heading-link" href="#mean-field-variational-family">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>One of the most popular families is the <strong>mean-field</strong> variational family which assumes that all the unknown parameters are mutually independent, each approximated by its own univariate variational density:
+$$ q(\bold{\theta} \mid \bold{\lambda}) = \prod_{i=1}^{m} q(\theta_i \mid \bold{\lambda}_i). $$</p>
+<p>For example, a typical choice for real-valued parameters is the normal variational family $q(\theta \mid \mu, \sigma^2)$ and the log-normal or Gamma for non-negative parameters. The main advantage of the mean-field family is in its simplicity as it requires only a minimum number of parameters to be estimated (no correlation parameters) and often leads to uncomplicated optimization. However, the mutually independent parameter assumption comes at a price because the mean-field family cannot capture relationships between model parameters. To see more comprehensive review of more complex variational families, take a look <a href="https://proceedings.mlr.press/v130/ambrogioni21a.html"  class="external-link" target="_blank" rel="noopener">here</a>. If would definitely recommend googling <strong>normalizing flows</strong> if you want to get serious about using VI.</p>
+<h1 id="Optimization">
+  ELBO optimization
+  <a class="heading-link" href="#Optimization">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Besides the choice of variational family, another key implementation detail to address is the way in which one finds the member of the variational family that maximizes the ELBO. Since this is a fairly general optimization problem, one can in principle use any optimization procedure. In the VI literature, the coordinate ascent and the gradient ascent procedures are the most prominent and widely used.</p>
+<p>The coordinate ascent approach is based on the simple idea that one can maximize ELBO, which is a multivariate function, by cyclically maximizing it along one direction at a time. Starting with initial values (denoted by superscript $0$) of the $m$ variational parameters $\bold{\lambda}^0$</p>
+<p>$$ \bold{\lambda}^0 = (\bold{\lambda}^0_1, \dots,\bold{\lambda}^0_m), $$</p>
+<p>one obtains the $(k+1)^{\text{th}}$ updated value of variational parameters by iteratively solving</p>
+<p>$$    \lambda_i^{k + 1} = \argmax_{x} \mathcal{L}(\lambda_1^{k + 1}, \dots, \lambda_{i-1}^{k + 1}, x, \lambda_{i + 1}^k, \dots, \lambda_m^k), $$
+which can be accomplished without using gradients.</p>
+<p>Variational inference via gradient ascent uses the standard iterative optimization algorithm based on the idea that the ELBO grows fastest in the direction of its gradient. In particular, the update of variational parameters $\bold{\lambda}$ at the $(k+1)^{\text{th}}$ iteration is given by
+$$ \bold{\lambda}^{k+1} \leftarrow \bold{\lambda}^{k} + \eta \times \nabla_{\bold{\lambda}} \mathcal{L}(\bold{\lambda}^{k}), $$
+where $\nabla_{\bold{\lambda}} \mathcal{L}(\bold{\lambda})$ is the ELBO gradient, and $\eta$ is the step size which is also called the learning rate. The step size controls the rate at which one updates the variational parameters.</p>
+<p>Although both coordinate and gradient methods are in principle nice and simple, they are inefficient for large datasets. To truly unlock the speed of VI it has become common practice to use the <a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent"  class="external-link" target="_blank" rel="noopener">stochastic gradient</a> ascent (SGA) algorithm. SGA in principle works the same way as the standard gradient ascent except one can use simple and fast-to-compute unbiased estimate of the gradient instead of the gradient based on the full training dataset.</p>
+<h1 id="Mmorpg">
+  Estimating the average number of active players in an mmorpg
+  <a class="heading-link" href="#Mmorpg">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>To see how ELBO optimization leads to a good approximation of target posterior distribution, let us consider Poisson sampling with a Gamma prior, which is a popular one-parameter model for count data. Suppose that you work for a game developer and your task is to estimate the average number of active users of a popular massively multiplier online role-playing game (mmorpg) playing between the peak evening hours 7 pm and 10 pm. This information can help game developers in allocating server resources and optimizing user experience. To estimate the average number of active users, we will consider the following counts (in thousands) of active players collected during the peak evening hours over a two-week period in the past month.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Sun</strong></th>
+<th><strong>Mon</strong></th>
+<th><strong>Tue</strong></th>
+<th><strong>Wed</strong></th>
+<th><strong>Thu</strong></th>
+<th><strong>Fri</strong></th>
+<th><strong>Sat</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Week 1</strong></td>
+<td>50</td>
+<td>47</td>
+<td>46</td>
+<td>52</td>
+<td>49</td>
+<td>55</td>
+<td>53</td>
+</tr>
+<tr>
+<td><strong>Week 2</strong></td>
+<td>48</td>
+<td>45</td>
+<td>51</td>
+<td>50</td>
+<td>53</td>
+<td>46</td>
+<td>47</td>
+</tr>
+</tbody>
+</table>
+<h3 id="gamma-poisson-model">
+  Gamma-Poisson model
+  <a class="heading-link" href="#gamma-poisson-model">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h3>
+<p>Suppose $\bold{y} = (y_1, \dots, y_n)$ represent the observed counts in $n$ time intervals where the counts are independent, and each $y_i$ follows a Poisson distribution with the same rate parameter $\theta &gt; 0$. The joint probability mass function of $\bold{y} = (y_1, \dots, y_n)$ is</p>
+<p>$$p(\bold{y} \mid \theta) \propto \prod^{n}_{i=1} \theta^{y_i} e ^{-\theta}. $$</p>
+<p>The posterior distribution for the rate parameter $\theta$ is our inference target as $\theta$ represents the expected number of counts that occurs during the given time intervals. Note that the Poisson sampling relies on several assumptions about the sampling process: One assumes that the time interval is fixed, the counts occurring during different time intervals are independent, and the rate $\theta$ at which the counts occur is constant over time. The Gamma-Poisson conjugacy states that if $\theta$ follows a Gamma prior distribution with shape and rate parameters $\alpha$ and $\beta$, it can be shown that the posterior distribution $p(\theta \mid \bold{y})$ will also have a Gamma density. Namely, if</p>
+<p>$$\theta\sim \textrm{Gamma}(\alpha,\beta),$$
+then</p>
+<p>$$\theta \mid \bold{y} \sim \textrm{Gamma}(\alpha+ \sum_{i=1}^n y_i, \beta + n). $$</p>
+<p>In other words, given $\alpha$, $\beta$, and $\bold{y}$, one can derive the analytical solution to the posterior of $p(\theta \mid \bold{y})$ and can subsequently sample from $\textrm{Gamma}(\alpha+ \sum_{i=1}^n y_i, \beta + n)$ to get posterior samples of $\theta$. So it turns out that actually no approximation is needed in this case, but it will serve as a good example to illustrate how VI works.</p>
+<p>Recall that VI approximates the (unknown) posterior distribution of a parameter by a simple family of distributions. In this Gamma-Poisson case, we will approximate the posterior distribution $p(\theta \mid \bold{y})$ by a log-normal distribution with mean $\mu$ and standard deviation $\sigma$:</p>
+<p>$$ q(\theta \mid \mu, \sigma) = \frac{1}{\theta \sigma \sqrt{2\pi}} e^{-\frac{(\ln{\theta} - \mu)^2}{2\sigma^2}}.$$</p>
+<p>It is a popular variational family for non-negative parameters because it can be expressed as a (continuously) transformed normal distribution, and therefore it is amenable to automatic differentiation (this will make a lot of sense if you googled normalizing flows).</p>
+<p>Enough of the general discussion about the Gamma-Poisson model and let us dig into estimating the average count of an mmorpg&rsquo;s active players. Suppose that you asked your expert colleague for an advice on the matter, and they tell you that a similar mmorpg has typically about 50,000 users during peak hours. However, they are not too sure about that, so the interval between  45,000 and 55,000 users should have a reasonably high probability. This reasoning leads to a $\textrm{Gamma}(100,2)$ as a reasonable prior for the average number of active users. If you payed attention in the paragraph above, you know that the true posterior distribution is $\textrm{Gamma}(792, 100)$. Play with the sliders in the Shiny app below to manually find the member of a log-normal variational family that well approximates the posterior distribution of $\theta$. Check the <code>Fit a variational approximation</code> box in the app to find the variational approximation using the gradient ascent algorithm.</p>
+
+<iframe src="https://kejzlar.shinyapps.io/VIsimple/" style="height:900px;width:100%;border:none;overflow:hidden;" scrolling="no"></iframe>
+
+<h1 id="Lda">
+  Document clustering with LDA
+  <a class="heading-link" href="#Lda">
+    <i class="fa fa-link" aria-hidden="true" title="Link to heading"></i>
+    <span class="sr-only">Link to heading</span>
+  </a>
+</h1>
+<p>Enough of playing with simple examples, let us use VIto implement the Latent Dirichlet Allocation (LDA) model in <code>R</code> and apply to a dataset of documents. To do so, we will analyze a collection of 2246 Associated Press newspaper articles to be clustered using the LDA model. The dataset is part of the <code>topicmodels</code> package. You can load the dataset <code>AssociatedPress</code> with the following R command.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>data(&#34;AssociatedPress&#34;, package = &#34;topicmodels&#34;)</span></span></code></pre></div>
+<p>The LDA is a mixed-membership clustering model, commonly used for document clustering. LDA models each document to have a mixture of topics, where each word in the document is drawn from a topic based on the mixing proportions. Specifically, the LDA model assumes $K$ topics for $M$ documents made up of words drawn from $V$ distinct words. For document $m$, a topic distribution $\bold{\theta_m}$ is drawn over $K$ topics from a Dirichlet distribution,
+$$\bold{\theta}_m \sim \textrm{Dirichlet}(\bold{\alpha}),$$</p>
+<p>where $\sum_{k=1}^{K}\theta_{m, k} = 1$ ($0 \leq \theta_{m, k} \leq 1$) and $\bold{\alpha}$ is the prior vector of length $K$ with positive values.</p>
+<p>Each of the $N_m$ words ${w_{m, 1},\dots, w_{m, N_m}}$ in document $m$ is then generated independently conditional on $\bold{\theta_m}$. To do so, first, the topic $z_{m, n}$ for word $w_{m, n}$ in document $m$ is drawn from</p>
+<p>$$z_{m, n} \sim \textrm{categorical}(\bold{\theta}_m),$$</p>
+<p>where $\bold{\theta_m}$ is the document-specific topic-distribution. Next, the word $w_{m, n}$ in document $m$ is drawn from</p>
+<p>$$w_{m, n} \sim \textrm{categorical}(\bold{\phi}_{z[m, n]}),$$</p>
+<p>which is the word distribution for topic $z_{m, n}$. Lastly, a Dirichlet prior is given to distributions $\bold{\phi}_k$ over words for topic $k$ as</p>
+<p>$$\bold{\phi}_k \sim \textrm{Dirichlet}(\bold{\beta}),$$</p>
+<p>where $\bold{\beta}$ is the prior a vector of length $V$ (i.e., the total number of words) with positive values.</p>
+<p>There are many packages out there that have native support for VI. If you want to sue <code>R</code>, I recommend using the <a href="https://mc-stan.org/cmdstanr/"  class="external-link" target="_blank" rel="noopener"><code>CmdStanR</code></a>, which is a lightweight interface to <code>Stan</code> for R users. I am not recommending to use the plain <code>RStan</code> if you are interested in extracting the ELBO trajectory which is not at all straightforward with <code>RStan</code> without doing some hacking. If you are familiar with <code>RStan</code> working with <code>CmdStanR</code> is not whole that different. For instance, models are defined in the same way as with <code>SRtan</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>data {
+</span></span><span style="display:flex;"><span>  int&lt;<span style="color:#7ee787">lower</span><span style="color:#f85149">=</span>2&gt; K;               // number of topics
+</span></span><span style="display:flex;"><span>  int&lt;<span style="color:#7ee787">lower</span><span style="color:#f85149">=</span>2&gt; V;               // number of words
+</span></span><span style="display:flex;"><span>  int&lt;<span style="color:#7ee787">lower</span><span style="color:#f85149">=</span>1&gt; M;               // number of docs
+</span></span><span style="display:flex;"><span>  int&lt;<span style="color:#7ee787">lower</span><span style="color:#f85149">=</span>1&gt; N;               // total word instances
+</span></span><span style="display:flex;"><span>  int&lt;<span style="color:#7ee787">lower</span><span style="color:#f85149">=</span>1<span style="color:#f85149">,</span> upper<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">V</span>&gt; w[N];    // word n
+</span></span><span style="display:flex;"><span>  int&lt;<span style="color:#7ee787">lower</span><span style="color:#f85149">=</span>1<span style="color:#f85149">,</span> upper<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">M</span>&gt; doc[N];  // doc ID for word n
+</span></span><span style="display:flex;"><span>  vector&lt;<span style="color:#7ee787">lower</span><span style="color:#f85149">=</span>0&gt;[K] alpha;     // topic prior vector of length K
+</span></span><span style="display:flex;"><span>  vector&lt;<span style="color:#7ee787">lower</span><span style="color:#f85149">=</span>0&gt;[V] beta;      // word prior vector of length V
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>parameters {
+</span></span><span style="display:flex;"><span>  simplex[K] theta[M];   // topic distribution for doc m
+</span></span><span style="display:flex;"><span>  simplex[V] phi[K];     // word distribution for topic k
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model {
+</span></span><span style="display:flex;"><span>  for (m in 1:M)
+</span></span><span style="display:flex;"><span>    theta[m] ~ dirichlet(alpha);  
+</span></span><span style="display:flex;"><span>  for (k in 1:K)
+</span></span><span style="display:flex;"><span>    phi[k] ~ dirichlet(beta);   
+</span></span><span style="display:flex;"><span>  for (n in 1:N) {
+</span></span><span style="display:flex;"><span>    real gamma[K];
+</span></span><span style="display:flex;"><span>    for (k in 1:K)
+</span></span><span style="display:flex;"><span>      gamma[k] = log(theta[doc[n], k]) + log(phi[k, w[n]]);
+</span></span><span style="display:flex;"><span>    target += log_sum_exp(gamma);  // likelihood;
+</span></span><span style="display:flex;"><span>  }  
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
+<p>Let&rsquo;s fit a two-topic LDA model (i.e., $K = 2$). Before that, I recommend removing the words from <code>AssociatedPress</code> datasets that are rare using the function <code>removeSparseTerms()</code> from the <code>tm</code> package. These words have a minimal effect on the LDA parameter estimation and unnecessarily increase the computational cost.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>dtm &lt;<span style="color:#7ee787">-</span> removeSparseTerms<span style="color:#f85149">(</span>AssociatedPress<span style="color:#f85149">,</span> 0<span style="color:#f85149">.</span>95<span style="color:#f85149">)</span></span></span></code></pre></div>
+<p>You are now ready to fit the LDA model using VI capabilities of the <code>CmdStanR</code>. The following code achieves the goal:</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>LDA_model_cmd &lt;<span style="color:#7ee787">-</span> cmdstan_model<span style="color:#f85149">(</span>stan_file <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#34;LDA.stan&#34;</span><span style="color:#f85149">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>N_TOPICS <span style="color:#f85149">&lt;</span>- 2
+</span></span><span style="display:flex;"><span>data <span style="color:#f85149">&lt;</span>- list<span style="color:#f85149">(</span>K <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">N_TOPICS,</span>
+</span></span><span style="display:flex;"><span>             V <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">dim(dtm)[2],</span>
+</span></span><span style="display:flex;"><span>             M <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">dim(dtm)[1],</span>
+</span></span><span style="display:flex;"><span>             N <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">sum(dtm$v),</span>
+</span></span><span style="display:flex;"><span>             w <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">rep(dtm$j,dtm$v),</span>
+</span></span><span style="display:flex;"><span>             doc <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">rep(dtm$i,dtm$v),</span>
+</span></span><span style="display:flex;"><span>             <span style="color:#f85149">#</span>according to Griffiths and Steyvers<span style="color:#f85149">(</span>2004<span style="color:#f85149">)</span>
+</span></span><span style="display:flex;"><span>             alpha <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">rep(50/N_TOPICS,N_TOPICS),</span>
+</span></span><span style="display:flex;"><span>             beta <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">rep(1,dim(dtm)[2])</span>
+</span></span><span style="display:flex;"><span><span style="color:#f85149">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vi_fit <span style="color:#f85149">&lt;</span>- LDA_model_cmd<span style="color:#f85149">$</span>variational<span style="color:#f85149">(</span>data <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">data,</span>
+</span></span><span style="display:flex;"><span>                                    seed <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">1,</span>
+</span></span><span style="display:flex;"><span>                                    output_samples <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">1000,</span>
+</span></span><span style="display:flex;"><span>                                    eval_elbo <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">1,</span>
+</span></span><span style="display:flex;"><span>                                    grad_samples <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">10,</span>
+</span></span><span style="display:flex;"><span>                                    elbo_samples <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">10,</span>
+</span></span><span style="display:flex;"><span>                                    algorithm <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#34;meanfield&#34;</span><span style="color:#f85149">,</span>
+</span></span><span style="display:flex;"><span>                                    output_dir <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">NULL,</span>
+</span></span><span style="display:flex;"><span>                                    iter <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">1000,</span>
+</span></span><span style="display:flex;"><span>                                    adapt_iter <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">20,</span>
+</span></span><span style="display:flex;"><span>                                    save_latent_dynamics<span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">TRUE,</span>
+</span></span><span style="display:flex;"><span>                                    tol_rel_obj <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">10^-4)</span></span></span></code></pre></div>
+<p>The <code>LDA.stan</code> file contains the <code>Stan</code> script for the LDA model. To access the ELBO values, use the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>vi_diag &lt;<span style="color:#7ee787">-</span> utils::read<span style="color:#f85149">.</span>csv<span style="color:#f85149">(</span>vi_fit<span style="color:#f85149">$</span>latent_dynamics_files<span style="color:#f85149">()[</span>1<span style="color:#f85149">],</span>
+</span></span><span style="display:flex;"><span>                           comment<span style="color:#f85149">.</span>char <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#34;#&#34;</span><span style="color:#f85149">)</span>
+</span></span><span style="display:flex;"><span>ELBO <span style="color:#f85149">&lt;</span>- data<span style="color:#f85149">.</span>frame<span style="color:#f85149">(</span>Iteration <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">vi_diag[,1],</span> ELBO <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">vi_diag[,3])</span></span></span></code></pre></div>
+<p>To display the topics that were extracted from the collection of articles using the LDA you can show the 10 most common words for each topic; that is, the parts of distribution $\bold{\phi}_k$, for $k \in {1,2}$, with the largest mass.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>V &lt;<span style="color:#7ee787">-</span> dim<span style="color:#f85149">(</span>dtm<span style="color:#f85149">)[</span>2<span style="color:#f85149">]</span>
+</span></span><span style="display:flex;"><span>odd_rows <span style="color:#f85149">&lt;</span>- rep<span style="color:#f85149">(</span>c<span style="color:#f85149">(</span>1<span style="color:#f85149">,</span>0<span style="color:#f85149">),</span> times <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">V)</span>
+</span></span><span style="display:flex;"><span>Topic1 <span style="color:#f85149">&lt;</span>- vb_fit<span style="color:#f85149">$</span>summary<span style="color:#f85149">(&#34;</span>phi<span style="color:#f85149">&#34;)[</span>odd_rows <span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">=</span> 1<span style="color:#f85149">,]</span>
+</span></span><span style="display:flex;"><span>Topic2 <span style="color:#f85149">&lt;</span>- vb_fit<span style="color:#f85149">$</span>summary<span style="color:#f85149">(&#34;</span>phi<span style="color:#f85149">&#34;)[</span>odd_rows <span style="color:#ff7b72;font-weight:bold">=</span><span style="color:#a5d6ff">=</span> 0<span style="color:#f85149">,]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>word_probs <span style="color:#f85149">&lt;</span>-data<span style="color:#f85149">.</span>frame<span style="color:#f85149">(</span>Topic <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">c(rep(&#34;Topic</span> 1<span style="color:#f85149">&#34;,</span> V<span style="color:#f85149">),</span> rep<span style="color:#f85149">(&#34;</span>Topic 2<span style="color:#f85149">&#34;,</span> V<span style="color:#f85149">)),</span>
+</span></span><span style="display:flex;"><span>                        Word <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">rep(dtm$dimnames$Terms,N_TOPICS),</span>
+</span></span><span style="display:flex;"><span>                        Probability <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">c(Topic1$mean,</span> Topic2<span style="color:#f85149">$</span>mean<span style="color:#f85149">))</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f85149">#</span> Selecting top 10 words per topic
+</span></span><span style="display:flex;"><span>top_words <span style="color:#f85149">&lt;</span>- word_probs <span style="color:#f85149">%</span>&gt;% group_by(Topic) %&gt;%
+</span></span><span style="display:flex;"><span>              top_n(10) %&gt;% ungroup() %&gt;% arrange(Topic, -Probability)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>top_words %&gt;%
+</span></span><span style="display:flex;"><span>  mutate(Word = reorder_within(Word, Probability, Topic)) %&gt;%
+</span></span><span style="display:flex;"><span>  ggplot(aes(Probability, Word, fill = factor(Topic))) +
+</span></span><span style="display:flex;"><span>  geom_col(show.legend = FALSE) +
+</span></span><span style="display:flex;"><span>  facet_wrap(~ Topic, scales = &#34;free&#34;) +
+</span></span><span style="display:flex;"><span>  scale_y_reordered() + theme(text = element_text(size = 15)) + xlim(0,0.025) +
+</span></span><span style="display:flex;"><span>  xlab(&#34;Word distributions ( \u03d5 )&#34;)</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/APdistr.png" width="600" height="300">
+
+
+<p>The most common words in topic 1 include <em>people, government, president, police,</em> and <em>state</em>, suggesting that this topic may represent political news. In contrast, the most common words in topic 2 include <em>percent, billion, million, market, American,</em> and <em>states</em>, hinting that this topic may represent news about the US economy. As the final note to document clustering with LDA, I will leave you with the code that creates word clouds with the most common words per topic using the <code>wordcloud</code> package.</p>
+<div class="highlight"><pre tabindex="0" style="color:#c9d1d9;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>top_words &lt;<span style="color:#7ee787">-</span> word_probs <span style="color:#f85149">%</span>&gt;% group_by(Topic) %&gt;% top_n(20) %&gt;%
+</span></span><span style="display:flex;"><span>              ungroup() %&gt;% arrange(Topic, -Probability)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mycolors &lt;<span style="color:#7ee787">-</span> brewer<span style="color:#f85149">.</span>pal<span style="color:#f85149">(</span>8<span style="color:#f85149">,</span> <span style="color:#f85149">&#34;</span>Dark2<span style="color:#f85149">&#34;)</span>
+</span></span><span style="display:flex;"><span>wordcloud<span style="color:#f85149">(</span>top_words <span style="color:#f85149">%</span>&gt;% filter(Topic == &#34;Topic 1&#34;) %&gt;% .$Word ,
+</span></span><span style="display:flex;"><span>          top_words %&gt;% filter(Topic == &#34;Topic 1&#34;) %&gt;% .$Probability,
+</span></span><span style="display:flex;"><span>          random.order = FALSE,
+</span></span><span style="display:flex;"><span>          color = mycolors)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mycolors &lt;<span style="color:#7ee787">-</span> brewer<span style="color:#f85149">.</span>pal<span style="color:#f85149">(</span>8<span style="color:#f85149">,</span> <span style="color:#f85149">&#34;</span>Dark2<span style="color:#f85149">&#34;)</span>
+</span></span><span style="display:flex;"><span>wordcloud<span style="color:#f85149">(</span>top_words <span style="color:#f85149">%</span>&gt;% filter(Topic == &#34;Topic 2&#34;) %&gt;% .$Word ,
+</span></span><span style="display:flex;"><span>          top_words %&gt;% filter(Topic == &#34;Topic 2&#34;) %&gt;% .$Probability,
+</span></span><span style="display:flex;"><span>          random.order = FALSE,
+</span></span><span style="display:flex;"><span>          color = mycolors)</span></span></code></pre></div>
+
+
+<img style="float: Center; margin-left: 7em;"  src="/images/APWC.png" width="600" height="300">
+
+
+<p><em>This text is an abbreviated version of <a href="https://www.tandfonline.com/doi/abs/10.1080/00031305.2023.2232006"  class="external-link" target="_blank" rel="noopener">Introducing Variational Inference in Statistics and Data Science Curriculum</a> also published in The American Statistician.</em></p>
+
+      </div>
+
+
+      <footer>
+        
+
+<section class="see-also">
+  
+    
+    
+    
+  
+</section>
+
+
+        
+        
+        
+        
+        
+      </footer>
+    </article>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css"
+    integrity="sha384-vKruj+a13U8yHIkAyGgK1J3ArTLzrFGBbBc0tDp4ad/EyewESeXE/Iv67Aj8gKZ0" crossorigin="anonymous">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"
+    integrity="sha384-PwRUT/YqbnEjkZO0zZxNqcxACrXe+j766U2amXcgMg5457rve2Y7I6ZJSm2A0mS4" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"
+    integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body,
+      {
+        delimiters: [
+          {left: '$$', right: '$$', display:true},
+          {left: '$', right: '$', display:false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ]
+      }
+    );"></script>
+  </section>
+
+    </div>
+
+    <footer class="footer">
+  <section class="container">
+    ©
+    
+      2020 -
+    
+    2023
+     Vojtech Kejzlar, Ph.D. 
+    ·
+    
+    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> & <a href="https://github.com/luizdepra/hugo-coder/" target="_blank" rel="noopener">Coder</a>.
+    
+  </section>
+</footer>
+
+  </main>
+
+  
+
+  
+  
+  <script src="/js/coder.min.6ae284be93d2d19dad1f02b0039508d9aab3180a12a06dcc71b0b0ef7825a317.js" integrity="sha256-auKEvpPS0Z2tHwKwA5UI2aqzGAoSoG3McbCw73gloxc="></script>
+  
+
+  
+
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-K5J0TDJRQ3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-K5J0TDJRQ3');
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+
+</html>

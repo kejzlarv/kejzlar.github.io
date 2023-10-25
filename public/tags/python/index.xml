@@ -8,12 +8,12 @@
     <language>en</language>
     <lastBuildDate>Tue, 10 Oct 2023 00:00:00 +0000</lastBuildDate><atom:link href="http://www.kejzlar.com/tags/python/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>How to: Logistic Regression Pipeline in Python</title>
+      <title>How to: logistic regression pipeline in Python</title>
       <link>http://www.kejzlar.com/posts/logistic-python/</link>
       <pubDate>Tue, 10 Oct 2023 00:00:00 +0000</pubDate>
       
       <guid>http://www.kejzlar.com/posts/logistic-python/</guid>
-      <description>Table of ContentsLink to headingIntroduction Logistic regression overview Exploratory data analysis and feature engineering Model fitting and performance metrics Feature selection Feature importance I recently stumbled upon a really nice Superstore Marketing Campaign Dataset during my weekly (as one does :) ) browsing sessions through Kaggle. The Kaggle data card has great motivation build around the dataset that I am pasting here:
+      <description>Table of ContentsLink to headingIntroduction Logistic regression overview Exploratory data analysis and feature engineering Model fitting and performance metrics Feature selection Feature importance I recently stumbled upon a nice Superstore Marketing Campaign Dataset during my weekly (as one does :) ) browsing sessions through Kaggle. The Kaggle data card has great motivation build around the dataset that I am pasting here:
 Context: A superstore is planning for the year-end sale.</description>
     </item>
     

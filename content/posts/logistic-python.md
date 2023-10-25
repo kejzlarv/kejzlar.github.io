@@ -1,6 +1,6 @@
 +++
 authors = ["Vojtech Kejzlar"]
-title = "How to: Logistic Regression Pipeline in Python"
+title = "How to: logistic regression pipeline in Python"
 date = "2023-10-10"
 math = true
 tags = [
@@ -29,7 +29,7 @@ series = ["Python tutorials"]
 5. [Feature selection](#RFE)
 6. [Feature importance](#Importance)
 
-I recently stumbled upon a really nice [Superstore Marketing Campaign Dataset](https://www.kaggle.com/datasets/ahsan81/superstore-marketing-campaign-dataset/data) during my weekly (as one does :) ) browsing sessions through Kaggle. The Kaggle data card has great motivation build around the dataset that I am pasting here:
+I recently stumbled upon a nice [Superstore Marketing Campaign Dataset](https://www.kaggle.com/datasets/ahsan81/superstore-marketing-campaign-dataset/data) during my weekly (as one does :) ) browsing sessions through Kaggle. The Kaggle data card has great motivation build around the dataset that I am pasting here:
 
 **Context:** A superstore is planning for the year-end sale. They want to launch a new offer - gold membership, that gives a 20\% discount on all purchases, for only 499 USD which is 999 USD on other days. It will be valid only for existing customers and the campaign through phone calls is currently being planned for them. The management feels that the best way to reduce the cost of the campaign is to make a predictive model which will classify customers who might purchase the offer.
 
@@ -41,13 +41,13 @@ I think that this is an awesome case study to show a complete logistic regressio
 
 - Overview of logistic regression
 - Exploratory data analysis and feature engineering
-- Model performance metrics (precision, recall, ROC curves etc.)
-- Feature selection via Recursive feature elimination and cross-validation
+- Model performance metrics (precision, recall, ROC curves, etc.)
+- Feature selection via Recursive Feature Elimination and cross-validation
 - Model interpretation and feature importance
 
 # Logistic regression overview {#LRIdea}
 
-Logistic regression model is a popular supervised learning algorithm for binary classification due to its interpretability, solid predictive performance, and intuitive connection to the standard linear regression. The logistic regression model assumes that a binary response $y_i$ follows a Bernoulli distribution with probability of success $p_i$:
+Logistic regression model is a popular supervised learning algorithm for binary classification due to its interpretability, solid predictive performance, and intuitive connection to the standard linear regression. The logistic regression model assumes that a binary response (target, label, will use interchangeably) $y_i$ follows a Bernoulli distribution with probability of success $p_i$:
 
 
 $$y_i \mid  p_i  \sim \textrm{Bernoulli}(p_i).$$
@@ -62,12 +62,12 @@ Lastly, by rearranging the terms in the logit equation, one can express the prob
 
 $$p_i = \frac{e^{\alpha + \beta^T x_i}}{1 + e^{\alpha + \beta^T x_i}}.$$
 
-The target feature prediction is done by thresholding on $p_i$. That is $y_i = 1$ if $p_i > t$ and $0$ otherwise where $t$ is a fixed threshold between $0$ and $1$. Typically, $t = 0.5$ so that $y_i = 1$ if $p_i > 1-p_i$.
+The target prediction is done by thresholding on $p_i$. That is $y_i = 1$ if $p_i > t$ and $0$ otherwise where $t$ is a fixed threshold between $0$ and $1$. Typically, $t = 0.5$ so that $y_i = 1$ if $p_i > 1-p_i$.
 
 
 # Exploratory data analysis and feature engineering {#EDA}
 
-Let us start by getting a better sense of what dataset we are working with, dealing with (potentially) missing values, and finding out which features might be related to the label variable. To do so we, will make the use of `pandas`, the go-to package for manipulating rectangular data, `numpy`, and some data visualization tools in `seaborn` and `matplotlib.pyplot`.
+Let us start by getting a better sense of what dataset we are working with, dealing with (potentially) missing values, and finding out which features might be related to the label. To do so, we will use of `pandas`, the go-to package for manipulating rectangular data, `numpy`, and some data visualization tools in `seaborn` and `matplotlib.pyplot`.
 
 
 {{< highlight Python >}}
@@ -81,7 +81,7 @@ store_data
 {{< /highlight >}}
 
 {{< rawhtml >}}
-<img style="float: Center;"  src="/images/Dataset_SS.png" width="965" height="399">
+<img style="float: Center;"  src="/images/Dataset_SS.png" width="965" height="379">
 {{< /rawhtml >}}
 
 {{< highlight Python >}}
@@ -98,7 +98,7 @@ As we can see, the dataset is a mix of quantitative and categorical features whi
 store_data = store_data.dropna()
 {{< /highlight >}}
 
-One last step, before moving onto some EDA and creating dummy variables is to deal with the `Dt_Customer` feature that corresponds to the date of customer's enrollment with the company. One way to use this information is to create a new feature `Days_Customer` saying how many days has a customer been enrolled with the company.
+One last step before moving onto some EDA and creating dummy variables is to deal with the `Dt_Customer` feature that corresponds to the date of a customer's enrollment with the company. One way to use this information is to create a new feature `Days_Customer` that says how many days has a customer been enrolled with the company.
 
 {{< highlight Python >}}
 from datetime import datetime
@@ -132,7 +132,7 @@ for index, row in store_data.iterrows():
 store_data["Days_Customer"] = np.array(day_transform[:])
 {{< /highlight >}}
 
-In general, to goal of EDA during logistic regression modeling is to get a sense of what features are important predictors of the label as well as discovering some potential limitation of the dataset. First, we can see that the dataset is not balanced with respect to the number of customers that responded positively to the last year's campaign:
+In general, the goal of EDA part of logistic regression modeling is to get a sense of what features are important predictors of the label as well as discovering some potential limitation of the dataset. First, we can see that the dataset is not balanced with respect to the number of customers that responded positively to the last year's campaign:
 
 {{< highlight Python >}}
 sns.catplot(data = store_data, x = "Response", kind = "count")
@@ -143,7 +143,7 @@ plt.show()
 <img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Response.png" width="490" height="489">
 {{< /rawhtml >}}
 
-This imbalance can negatively impact the variability of model performance metrics as the proportion of customers with a positive response will be relatively low in the testing dataset. Moving on to exploring the categorical features `Education, Marital_Status, Complain, Kidhome,` and `Teenhome`, starting with the `Education,` we can display a side-by side barplot:
+This imbalance can lead to a high variability of model performance metrics as the proportion of customers with a positive response will be relatively low in the testing dataset. Moving on to exploring the categorical features `Education, Marital_Status, Complain, Kidhome,` and `Teenhome`, starting with the `Education,` we can display a side-by side barplot:
 
 {{< highlight Python >}}
 sns.countplot(data=store_data, x="Education", hue="Response")
@@ -167,7 +167,7 @@ plt.show()
 <img style="float: Center; margin-left: 7em;"  src="/images/Logistic_python/Education_group.png" width="565" height="496">
 {{< /rawhtml >}}
 
-We can clearly see that the biggest yield was for customers with PhDs and the smallest for customers with a basic education. We can similarly explore all the other categorical variables. It appears that all the other categorical variables will be helpful in predicting which customer will respond positively to a campaign, perhaps with the exception of `Complain`.
+We can clearly see that the biggest yield was for customers with PhDs and the smallest for customers with "basic" education. We can similarly explore all the other categorical features. It appears that all them will be helpful in predicting which customer will respond positively to the campaign, perhaps with the exception of `Complain`.
 
 {{< highlight Python >}}
 ms_feature = store_data.groupby("Marital_Status")["Response"].sum() / store_data.groupby("Marital_Status")["Response"].count()
@@ -210,7 +210,7 @@ plt.show()
 {{< /rawhtml >}}
 
 
-To see the relationships between the quantitative features and the label, we want to compare the distributions of given quantitative feature for customers with positive and negative responses. This can be done using side-by-side boxplot or more clearly, using the `sns.pointplot()` that displays the means of each group together with their confidence intervals:
+To see the relationships between quantitative features and label, we can compare the distributions of a given quantitative feature for customers with positive and negative responses. This can be done using side-by-side boxplot or more clearly, using the `sns.pointplot()` that displays the means of each group together with their confidence intervals:
 
 {{< highlight Python >}}
 quantitative_features = np.logical_not(np.isin(store_data.columns.values, ["Id", "Teenhome", "Kidhome", "Education", "Complain", "Marital_Status", "Dt_Customer", "Response"]))
@@ -244,7 +244,7 @@ X_train, X_test, y_train, y_test = train_test_split(data_final.iloc[:,data_final
                                                     data_final["Response"], test_size=0.33, random_state=123)
 {{< /highlight >}}
 
-One last thing (I promise), it is a good idea to standardize the quantitative features before model fitting. To see why, we should discuss how to assess feature importance. For simplicity, consider a logistic regression model with a single (quantitative) feature. If we increase the feature by 1 the change in odds $p_i / (1-p_i)$ will be proportional to the magnitude of the coefficient $\beta$. This means that one way to assess feature importance is to compare the size of $\beta$ coefficients. However, if the features have different scales or units, the model may give higher coefficients (thus higher importance) to the features with larger values, even if they are not necessarily more important.
+One last thing (I promise), it is a good idea to standardize the quantitative features before model fitting. To see why, we should discuss how to assess feature importance. For simplicity, consider a logistic regression model with a single (quantitative) feature. If we increase the feature by 1, the change in odds $p_i / (1-p_i)$ will be proportional to the magnitude of the coefficient $\beta$. This means that a way to assess feature importance is to compare the size of $\beta$ coefficients. However, if the features have different scales or units, the model may give higher coefficients (thus higher importance) to the features with larger values, even if they are not necessarily more important.
 
 {{< highlight Python >}}
 from sklearn.preprocessing import StandardScaler
@@ -265,7 +265,7 @@ logreg = LogisticRegression(solver = 'liblinear', random_state = 0, max_iter=100
 logreg.fit(X_train, y_train)
 {{< /highlight >}}
 
-I suggest to go over the `LogisticRegression` [documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html) to understand each of the inputs above (we are using L2 regularization to protect against overfitting). The simplest metric to assess quality of the `logreg` model is **accuracy** of predictions in hold-out data. That is how good is the model in predicting whether customer responds positively or negatively based on customers' features.
+I suggest to go over the `LogisticRegression` [documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html) to understand each of the inputs above (we are using L2 regularization to protect against overfitting). The simplest metric to assess quality of the `logreg` model is **accuracy** of predictions in hold-out data. That is, how good is the model in predicting whether a customer responds positively or negatively to the campaign.
 
 {{< highlight Python >}}
 y_pred = logreg.predict(X_test)
@@ -276,15 +276,15 @@ print('Accuracy of logistic regression classifier on test set: {:.2f}'.format(lo
 <img style="float: Center;"  src="/images/Logistic_python/Accuracy_full.png" width="965" height="30">
 {{< /rawhtml >}}
 
-Our model correctly predicted the behavior of 86\% of customers in the testing set. The problem of assessing model performance solely based on accuracy is that we ignore how model does within each class. For that reason, it is helpful to consider the following:
+Our model correctly predicted the behavior of 86\% of customers in the testing dataset. The problem of assessing model performance solely based on accuracy is that we ignore how model does within each class. For that reason, it is helpful to consider the following:
 
-- **True positives**: Correctly predicted positives (ones)
-- **True negatives**: Correctly predicted negatives (zeros)
-- **False negatives**: Incorrectly predicted negatives
-- **False positives**: Incorrectly predicted positives
+- **True positives**: Correctly predicted positives (ones).
+- **True negatives**: Correctly predicted negatives (zeros).
+- **False negatives**: Incorrectly predicted negatives.
+- **False positives**: Incorrectly predicted positives.
 - **Sensitivity** (also known as **true positive rate** or **recall**): Ratio of the number of true positives to the number of actual positives. It says what proportion of actual positives was identified correctly.
 - **Specificity** (also known as **true negative rate**): Ratio of the number of true negatives to the number of actual negatives.  It says what proportion of actual negatives was identified correctly.
-- **Precision** (also known as **positive predictive rate**): Ratio of the number of true positives to the number of positive predictions (TP / (TP + FP)). It says what proportion of positive identifications was actually correct?
+- **Precision** (also known as **positive predictive rate**): Ratio of the number of true positives to the number of positive predictions (TP / (TP + FP)). It says what proportion of positive identifications was actually correct.
 - **Fall-out** (also known as **false positive rate**): Ratio of the number of false positives to the number of actual negatives (1 - Specificity). It says what is the proportion of negatives that were incorrectly classified as positives.
 
 You can read about these and (many) other useful metrics [here](https://en.wikipedia.org/wiki/Sensitivity_and_specificity). You can compute all of these from a [confusion matrix](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html) that gives information about TN ($C_{0,0}$), FN ($C_{1,0}$), FP ($C_{0,1}$), and TP (($C_{1,1}$)):
@@ -306,7 +306,7 @@ If you do the math, we get:
 |--------|-------------|-----------|----------|
 | 0.41   | 0.95        | 0.58      | 0.05     |
 
-The shortcoming of all the quantities that we just computed that they depend on the value of the classification threshold. Popular metrics used for classification are the [Receiver Operating Characteristics](https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc) (ROC) curve and the area under the ROC curve (AUC). The ROC curve a plot of true positive rate (recall) vs false positive rate (fall-out) shows the performance of classifier at various classification thresholds. Lowering the classification threshold classifies more items as positive, thus increasing both false positives and true positives. The AUC measures the entire two-dimensional area underneath the entire ROC curve. AUC provides an aggregate measure of performance across all possible classification thresholds. AUC ranges in value from 0 to 1. A model whose predictions are 100% wrong has an AUC of 0.0; one whose predictions are 100% correct has an AUC of 1.0. A model that assigns a class label randomly will have AUC 0.5. Therefore the higher the AUC, the better the classifier irrespective of the classification threshold. Fortunately, `sklearn` has a pre-build functions that make printing the ROC curves and computing AUC simple.
+The shortcoming of all the quantities that we just computed is that they depend on the classification threshold. Popular metrics used for classification are the [Receiver Operating Characteristics](https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc) (ROC) curve and the area under the ROC curve (AUC). The ROC curve is a plot of true positive rate (recall) vs false positive rate (fall-out) that shows the performance of classifier at various classification thresholds. Lowering the classification threshold classifies more items as positive, thus increasing both false positives and true positives. The AUC measures the entire two-dimensional area underneath the entire ROC curve. AUC provides an aggregate measure of performance across all possible classification thresholds. AUC ranges in value from 0 to 1. A model whose predictions are 100% wrong has an AUC of 0.0; one whose predictions are 100% correct has an AUC of 1.0. A model that assigns a class label randomly will have AUC of 0.5. Therefore, the higher the AUC, the better the classifier irrespective of the classification threshold. Fortunately, `sklearn` has a pre-build functions that make printing the ROC curves and computing AUC simple.
 
 {{< highlight Python >}}
 from sklearn.metrics import roc_auc_score
@@ -328,7 +328,7 @@ plt.show()
 
 # Feature selection {#RFE}
 
-It is not always a good idea to keep all the features in the model. Using features that are not related to the target label can negatively affect the model's performance. Again, there are many ways to do feature selection, often though, they are some version of backward elimination when you start with the full model and systematically remove the least important features. The Recursive Feature Elimination (RFE) with cross-validation accomplishes this by recursively eliminating features based on the model performance improvement estimated using cross-validation. The final number of features select so that including more features in the model will not significantly improve its performance.
+It is not always a good idea to keep all the features in the model. Using features that are not related to the target label can negatively affect the model's performance. Again, there are many ways to do feature selection, often though, they are some version of backward elimination when you start with the full model and systematically remove the least important features. The Recursive Feature Elimination (RFE) with cross-validation accomplishes this by recursively eliminating features based on the model performance improvement estimated using cross-validation. The final number of features are selected so that including more features in the model will not significantly improve its performance.
 
 {{< highlight Python >}}
 from sklearn.feature_selection import RFECV
@@ -403,4 +403,4 @@ plt.show()
 <img style="float: Center;"  src="/images/Logistic_python/Features.png" width="1001" height="525">
 {{< /rawhtml >}}
 
-What did we learn from the figure above? First, the categorical features are more important than the quantitative as they are higher ranked. Then, the marital status is the most important feature with the likelihood of positive response to the campaign being smallest for the people who are "Together". Additionally, our feature `Days_Customers` appears to be fairly influential in determining the success of campaign. More faithful customers are more likely to respond positively. Lastly, note that the negative value of `Recency` together with the fact that we standardized the quantitative features means that customers that shopped recently will be more likely to respond positively (- * - = +) than those who haven't shopped in a while.
+What did we learn from the figure above? First, the categorical features are more important than the quantitative ones as they are higher ranked. Then, the marital status is the most important feature with the likelihood of positive response to the campaign being smallest for the people who are "Together". Additionally, our feature `Days_Customers` appears to be fairly influential in determining the success of campaign. More faithful customers are more likely to respond positively. Lastly, note that the negative value of `Recency` together with the fact that we standardized the quantitative features means that customers that shopped recently will be more likely to respond positively (- * - = +) than those who haven't shopped in a while.

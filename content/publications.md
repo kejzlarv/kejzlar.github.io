@@ -37,7 +37,8 @@ Vojtech Kejzlar, Leo Neufcourt, Witold Nazarewicz, Paul-Gerhard Reinhard (2020).
 {{< rawhtml >}}
 <i class="fa fa-book" style="color: CornflowerBlue "></i>  
 {{< /rawhtml >}}
-Vojtech Kejzlar, Leo Neufcourt, Witold Nazarewicz (2023). Local Bayesian Dirichlet Mixing of Imperfect Models. *Submitted for Publication*.
+Vojtech Kejzlar, Leo Neufcourt, Witold Nazarewicz (2023). Local Bayesian Dirichlet Mixing of Imperfect Models. *Accepted for publication in Scientific Reports*. \
+[`arXiv`](https://arxiv.org/abs/2311.01596)
 
 
 <!--

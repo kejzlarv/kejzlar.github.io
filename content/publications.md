@@ -7,7 +7,7 @@ draft = false
 <i class="fa fa-book" style="color: firebrick"></i>  
 {{< /rawhtml >}}
 Vojtech Kejzlar, Leo Neufcourt, Witold Nazarewicz (2023). [Local Bayesian Dirichlet Mixing of Imperfect Models](https://www.nature.com/articles/s41598-023-46568-0). *Scientific Reports*. \
-[`arXiv`](https://arxiv.org/abs/2003.12890)
+[`arXiv`](https://arxiv.org/abs/2311.01596)
 
 {{< rawhtml >}}
 <i class="fa fa-book" style="color: firebrick"></i>  
